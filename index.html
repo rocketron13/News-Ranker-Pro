@@ -141,26 +141,7 @@
     }
 
   
-    // Test Supabase connection
-    async function testSupabase() {
-      const { data, error } = await sb
-        .from('headlines')
-        .select('text')
-        .limit(1);
-    
-      if (error) {
-        console.error('Supabase error:', error.message);
-        alert('Supabase error: ' + error.message);
-      } else if (data && data.length) {
-        console.log('Supabase data:', data);
-        alert('Supabase connected! First headline: ' + data[0].text);
-      } else {
-        alert('Supabase connected, but no headlines found.');
-      }
-    }
-  
-    document.addEventListener('DOMContentLoaded', testSupabase);
-        
+          
 
     
     // Make selectTopic async and load a random headline
