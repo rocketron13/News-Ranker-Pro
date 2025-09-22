@@ -137,186 +137,186 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let currentTopicId = null;
-    let currentTopicTitle = null;
-    let currentHeadline = null;
+    
+  // --- App state ---
+  let currentTopicId = null;
+  let currentTopicTitle = null;
+  let currentHeadline = null;
 
+  // Stable device id (no auth yet)
+  let deviceId = localStorage.getItem('nr_device_id');
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem('nr_device_id', deviceId);
+  }
 
-    // at top of your <script>, after creating `sb`
-    let deviceId = localStorage.getItem('nr_device_id');
-    if (!deviceId) {
-      deviceId = crypto.randomUUID();
-      localStorage.setItem('nr_device_id', deviceId);
+  // --- Data helpers ---
+  async function loadRandomHeadlineForTopic(topicTitle) {
+    // (1) Topic lookup (cache)
+    if (currentTopicTitle !== topicTitle) {
+      const { data: t, error: tErr } = await sb
+        .from('topics')
+        .select('id,title')
+        .eq('title', topicTitle)
+        .single();
+      if (tErr) { alert('Topic lookup error: ' + tErr.message); return; }
+      currentTopicId = t.id;
+      currentTopicTitle = t.title;
     }
 
-    
-    // Get a random headline for the selected topic
-    async function loadRandomHeadlineForTopic(topicTitle) {
-      // 1) Topic lookup (cache by title)
-      if (currentTopicTitle !== topicTitle) {
-        const { data: t, error: tErr } = await sb
-          .from('topics')
-          .select('id,title')
-          .eq('title', topicTitle)
-          .single();
-        if (tErr) return alert('Topic lookup error: ' + tErr.message);
-        currentTopicId = t.id;
-        currentTopicTitle = t.title;
-      }
-    
-      // 2) Count headlines for topic
-      const { count, error: cErr } = await sb
-        .from('headlines')
-        .select('id', { count: 'exact', head: true })
-        .eq('topic_id', currentTopicId);
-      if (cErr) return alert('Count error: ' + cErr.message);
-      if (!count) {
-        document.getElementById('headline').textContent = `"No headlines yet for ${topicTitle}."`;
-        return;
-      }
-    
-      // 3) Pick random offset and fetch one
-      const idx = Math.floor(Math.random() * count);
-      const { data: rows, error: hErr } = await sb
-        .from('headlines')
-        .select('id,text')
-        .eq('topic_id', currentTopicId)
-        .range(idx, idx);
-      if (hErr) return alert('Headline fetch error: ' + hErr.message);
-      if (!rows?.length) {
-        document.getElementById('headline').textContent = `"No headline found."`;
-        return;
-      }
-    
-      currentHeadline = rows[0]; // { id, text }
-      document.getElementById('headline').textContent = `"${rows[0].text}"`;
+    // (2) Count headlines
+    const { count, error: cErr } = await sb
+      .from('headlines')
+      .select('id', { count: 'exact', head: true })
+      .eq('topic_id', currentTopicId);
+    if (cErr) { alert('Count error: ' + cErr.message); return; }
+    if (!count) {
+      document.getElementById('headline').textContent = `"No headlines yet for ${topicTitle}."`;
+      return;
     }
 
-  
-          
-
-    
-    // Make selectTopic async and load a random headline
-    async function selectTopic(topic) {
-      document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('topicPage').style.display = 'block';
-      document.getElementById('topicTitle').textContent = `Topic: ${topic}`;
-      document.getElementById('question').innerHTML =
-        `Does this headline <b style="font-size:1.3em;">frame</b> ` +
-        `<b style="font-size:1.3em; text-decoration:underline;">${topic}</b> ` +
-        `as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
-    
-      await loadRandomHeadlineForTopic(topic);
+    // (3) Random fetch
+    const idx = Math.floor(Math.random() * count);
+    const { data: rows, error: hErr } = await sb
+      .from('headlines')
+      .select('id,text')
+      .eq('topic_id', currentTopicId)
+      .range(idx, idx);
+    if (hErr) { alert('Headline fetch error: ' + hErr.message); return; }
+    if (!rows?.length) {
+      document.getElementById('headline').textContent = `"No headline found."`;
+      return;
     }
 
+    currentHeadline = rows[0];
+    document.getElementById('headline').textContent = `"${rows[0].text}"`;
+  }
 
-    function goHome() {
-      document.getElementById('topicPage').style.display = 'none';
-      document.getElementById('mainMenu').style.display = 'block';
-    }
+  // --- UI actions ---
+  async function selectTopic(topic) {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('topicPage').style.display = 'block';
+    document.getElementById('topicTitle').textContent = `Topic: ${topic}`;
+    document.getElementById('question').innerHTML =
+      `Does this headline <b style="font-size:1.3em;">frame</b> ` +
+      `<b style="font-size:1.3em; text-decoration:underline;">${topic}</b> ` +
+      `as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
+    document.getElementById('rateStatus').textContent = '';
+    document.getElementById('results').style.display = 'none';
+    await loadRandomHeadlineForTopic(topic);
+  }
 
-    // Next Headline button -> fetch another random one
-    async function nextHeadline() {
-      if (!currentTopicTitle) return;
-      document.getElementById('rateStatus').textContent = '';
-      document.getElementById('results').style.display = 'none'; // hide results box
-      await loadRandomHeadlineForTopic(currentTopicTitle);
-    }
+  function goHome() {
+    document.getElementById('topicPage').style.display = 'none';
+    document.getElementById('mainMenu').style.display = 'block';
+  }
 
-    // Map numeric buttons → enum labels
-    const STANCE_ENUM = {
-      [-2]: 'strongly_anti',
-      [-1]: 'moderately_anti',
-       [0]: 'neutral',
-       [1]: 'moderately_pro',
-       [2]: 'strongly_pro',
+  async function nextHeadline() {
+    if (!currentTopicTitle) return;
+    document.getElementById('rateStatus').textContent = '';
+    document.getElementById('results').style.display = 'none';
+    await loadRandomHeadlineForTopic(currentTopicTitle);
+  }
+
+  // --- Ratings wiring ---
+  const STANCE_ENUM = {
+    [-2]: 'strongly_anti',
+    [-1]: 'moderately_anti',
+     [0]: 'neutral',
+     [1]: 'moderately_pro',
+     [2]: 'strongly_pro',
+  };
+
+  document.getElementById('classificationButtons').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const val = Number(btn.dataset.rating);
+    await handleRating(val);
+  });
+
+  async function handleRating(val) {
+    const statusEl = document.getElementById('rateStatus');
+    if (!currentHeadline?.id) { alert('Pick a topic first.'); return; }
+
+    const payload = {
+      headline_id: currentHeadline.id,
+      stance_chosen: STANCE_ENUM[val],
+      device_id: deviceId,
+      user_id: null
+      // NOTE: actor_id omitted (generated on your table)
     };
-    
-      // Listen for clicks on any classification button
-      document.getElementById('classificationButtons').addEventListener('click', async (e) => {
-      const btn = e.target.closest('button');
-      if (!btn) return;
-      const val = Number(btn.dataset.rating);
-      await handleRating(val);
-    });
-  
-    async function handleRating(val) {
-      const statusEl = document.getElementById('rateStatus');
-      if (!currentHeadline?.id) { alert('Pick a topic first.'); return; }
-    
-      const payload = {
-        headline_id: currentHeadline.id,
-        stance_chosen: STANCE_ENUM[val],
-        device_id: deviceId,
-        user_id: null
-      };
-    
-      const { data, error } = await sb.from('ratings').insert(payload).select('id').single();
-    
-      if (error) {
-        if (error.code === '23505') { statusEl.textContent = 'Already rated. Showing results…'; }
-        else { statusEl.textContent = 'Save failed: ' + error.message; return; }
+
+    const { data, error } = await sb
+      .from('ratings')
+      .insert(payload)
+      .select('id')
+      .single();
+
+    if (error) {
+      // 23505 unique violation (if you later add unique index)
+      if (error.code === '23505') {
+        statusEl.textContent = 'Already rated. Showing results…';
       } else {
-        statusEl.textContent = `Saved (id: ${data.id})`;
-      }
-    
-      // show results (includes the user’s vote)
-      await showResultsForCurrentHeadline();
-    }
-
-
-    async function showResultsForCurrentHeadline() {
-      if (!currentHeadline?.id) return;
-    
-      const { data, error } = await sb
-        .from('ratings')
-        .select('stance_chosen')
-        .eq('headline_id', currentHeadline.id);
-    
-      const box = document.getElementById('results');
-      const list = document.getElementById('resultsList');
-    
-      if (error) {
-        list.textContent = 'Error loading results.';
-        box.style.display = 'block';
+        console.error(error);
+        statusEl.textContent = 'Save failed: ' + error.message;
         return;
       }
-    
-      const counts = { strongly_anti:0, moderately_anti:0, neutral:0, moderately_pro:0, strongly_pro:0 };
-      data.forEach(r => { counts[r.stance_chosen] = (counts[r.stance_chosen] ?? 0) + 1; });
-      const total = data.length || 1;
-    
-      const order = [
-        ['strongly_anti','Strongly Anti'],
-        ['moderately_anti','Moderately Anti'],
-        ['neutral','Neutral'],
-        ['moderately_pro','Moderately Pro'],
-        ['strongly_pro','Strongly Pro']
-      ];
-    
-      // Build bars (percent labels only; counts hidden for now)
-      const html = order.map(([key, label]) => {
-        const pct = Math.round((counts[key] * 100) / total);
-      
-        // If no votes → no neon fill
-        const fillHtml = pct > 0
-          ? `<div class="results-fill" style="width:${pct}%;">${pct}%</div>`
-          : ``;
-      
-        return `
-          <div class="results-row">
-            <span class="results-label">${label}</span>
-            <div class="results-bar">
-              ${fillHtml}
-            </div>
+    } else {
+      statusEl.textContent = `Saved (id: ${data.id})`;
+    }
+
+    await showResultsForCurrentHeadline();
+  }
+
+  // --- Results (neon bars) ---
+  async function showResultsForCurrentHeadline() {
+    if (!currentHeadline?.id) return;
+
+    const { data, error } = await sb
+      .from('ratings')
+      .select('stance_chosen')
+      .eq('headline_id', currentHeadline.id);
+
+    const box = document.getElementById('results');
+    const list = document.getElementById('resultsList');
+
+    if (error) {
+      list.textContent = 'Error loading results.';
+      box.style.display = 'block';
+      return;
+    }
+
+    const counts = { strongly_anti:0, moderately_anti:0, neutral:0, moderately_pro:0, strongly_pro:0 };
+    data.forEach(r => { counts[r.stance_chosen] = (counts[r.stance_chosen] ?? 0) + 1; });
+    const total = data.length || 1;
+
+    const order = [
+      ['strongly_anti','Strongly Anti'],
+      ['moderately_anti','Moderately Anti'],
+      ['neutral','Neutral'],
+      ['moderately_pro','Moderately Pro'],
+      ['strongly_pro','Strongly Pro']
+    ];
+
+    const html = order.map(([key, label]) => {
+      const pct = Math.round((counts[key] * 100) / total);
+      const fillHtml = pct > 0
+        ? `<div class="results-fill" style="width:${pct}%;">${pct}%</div>`
+        : ``;
+      return `
+        <div class="results-row">
+          <span class="results-label">${label}</span>
+          <div class="results-bar">
+            ${fillHtml}
           </div>
-        `;
-      }).join('');
-      
+        </div>
+      `;
+    }).join('');
 
-
-
-  </script>
+    list.innerHTML = html;
+    box.style.display = 'block';
+  }
+</script>
 </body>
 
 </html>
