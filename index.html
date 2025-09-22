@@ -49,6 +49,26 @@
     .moderate-pro   { background: #81c784; }
     .strong-pro     { background: #388e3c; }
 
+   /* This is for the results box styling. */
+    .results-row { margin: 8px 0; }
+    .results-label { display:block; margin-bottom:4px; color: var(--muted); font-size: 0.95rem; }
+    .results-bar {
+      position: relative; height: 26px; border-radius: 6px; background: #222; overflow: hidden;
+      border: 1px solid #333;
+    }
+    .results-fill {
+      position:absolute; top:0; left:0; height:100%; width:0%;
+      display:flex; align-items:center; justify-content:flex-end;
+      padding-right:8px; font-weight:700; color:#fff; transition: width .35s ease;
+    }
+    .fill-strongly-anti   { background:#d32f2f; }
+    .fill-moderately-anti { background:#f57c00; }
+    .fill-neutral         { background:#757575; }
+    .fill-moderately-pro  { background:#81c784; color:#0b2a12; }
+    .fill-strongly-pro    { background:#388e3c; }
+    
+
+    
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -81,7 +101,7 @@
 
  // Results box
   <div id="results" class="card" style="display:none; margin-top:16px;">
-    <h3>Poll Results</h3>
+    <h3>This is How Other People Ranked this Headline</h3>
     <div id="resultsList"></div>
   </div>
     
@@ -234,21 +254,22 @@
     
       const { data, error } = await sb
         .from('ratings')
-        .select('stance_chosen')            // pull stances for this headline
+        .select('stance_chosen')
         .eq('headline_id', currentHeadline.id);
     
+      const box = document.getElementById('results');
+      const list = document.getElementById('resultsList');
+    
       if (error) {
-        document.getElementById('resultsList').textContent = 'Error loading results.';
-        document.getElementById('results').style.display = 'block';
+        list.textContent = 'Error loading results.';
+        box.style.display = 'block';
         return;
       }
     
-      // Count votes per stance
       const counts = { strongly_anti:0, moderately_anti:0, neutral:0, moderately_pro:0, strongly_pro:0 };
       data.forEach(r => { counts[r.stance_chosen] = (counts[r.stance_chosen] ?? 0) + 1; });
-      const total = data.length || 1; // avoid divide-by-zero
+      const total = data.length || 1;
     
-      // Render simple list with percentages
       const order = [
         ['strongly_anti','Strongly Anti'],
         ['moderately_anti','Moderately Anti'],
@@ -256,13 +277,28 @@
         ['moderately_pro','Moderately Pro'],
         ['strongly_pro','Strongly Pro']
       ];
-      const html = order.map(([k,label]) => {
-        const pct = Math.round((counts[k] * 100) / total);
-        return `<div>${label}: <b>${pct}%</b> (${counts[k]})</div>`;
+    
+      // Build bars (percent labels only; counts hidden for now)
+      const html = order.map(([key, label]) => {
+        const pct = Math.round((counts[key] * 100) / total);
+        // tiny visual for 0% so the label still has a background edge
+        const width = pct === 0 ? 0 : pct;
+        return `
+          <div class="results-row">
+            <span class="results-label">${label}</span>
+            <div class="results-bar">
+              <div class="results-fill fill-${key}" style="width:${width}%;">
+                ${pct}%
+              </div>
+            </div>
+          </div>
+        `;
       }).join('');
-      document.getElementById('resultsList').innerHTML = html;
-      document.getElementById('results').style.display = 'block';
+    
+      list.innerHTML = html;
+      box.style.display = 'block';
     }
+
 
 
   </script>
