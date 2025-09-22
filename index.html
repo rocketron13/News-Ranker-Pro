@@ -93,6 +93,24 @@
     const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
     const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Test Supabase connection
+    async function testSupabase() {
+      // replace "headlines" with your actual table name
+      const { data, error } = await supabase.from('headlines').select().limit(1);
+    
+      if (error) {
+        console.error('Supabase error:', error.message);
+        alert('Supabase error: ' + error.message);
+      } else {
+        console.log('Supabase data:', data);
+        alert('Supabase connected! First row: ' + JSON.stringify(data));
+      }
+    }
+    
+    // Run test as soon as page loads
+    document.addEventListener('DOMContentLoaded', testSupabase);
+
     
     function selectTopic(topic) {
       // Hide menu, show topic page
