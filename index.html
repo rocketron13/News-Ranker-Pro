@@ -15,22 +15,100 @@
     button { padding:10px 16px; border-radius:10px; border:2px solid var(--neon);
              background:transparent; color:var(--neon); font-weight:700; cursor:pointer; }
     button:hover { background:var(--neon); color:#102326; box-shadow:0 0 16px var(--neon); }
+
+        button:hover { background:var(--neon); color:#102326; box-shadow:0 0 16px var(--neon); }
+
+    /* extra styles */
+    blockquote {
+      font-style: italic;
+      font-size: 1.1rem;
+      margin: 16px 0;
+      padding-left: 12px;
+      border-left: 3px solid var(--neon);
+    }
+
+    #classificationButtons {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    #classificationButtons button {
+      flex: 1;
+      padding: 10px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .strong-anti    { background: #d32f2f; }
+    .moderate-anti  { background: #f57c00; }
+    .neutral        { background: #757575; }
+    .moderate-pro   { background: #81c784; }
+    .strong-pro     { background: #388e3c; }
+
   </style>
 </head>
 <body>
-  <h1>Welcome to News Ranker</h1>
-  <div class="card">
-    <p>Select a News Topic to Rank:</p>
-    <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
-    <button onclick="selectTopic('Police')">Police</button>
-    <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
-  </div>
-  <div id="status"></div>
+  <!-- Main Menu -->
+  <section id="mainMenu">
+    <h1>Welcome to News Ranker</h1>
+    <div class="card">
+      <p>Select a News Topic to Rank:</p>
+      <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
+      <button onclick="selectTopic('Police')">Police</button>
+      <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
+    </div>
+  </section>
+
+  <!-- Topic Page -->
+  <section id="topicPage" style="display:none;">
+    <h2 id="topicTitle"></h2>
+    <p id="question"></p>
+    <blockquote id="headline">"Placeholder headline goes here."</blockquote>
+
+    <div id="classificationButtons">
+      <button class="strong-anti">Strongly Anti</button>
+      <button class="moderate-anti">Moderately Anti</button>
+      <button class="neutral">Neutral</button>
+      <button class="moderate-pro">Moderately Pro</button>
+      <button class="strong-pro">Strongly Pro</button>
+    </div>
+
+    <div style="margin-top:20px;">
+      <button onclick="goHome()">Main Menu</button>
+      <button onclick="nextHeadline()">Next Headline</button>
+
+      
+    </div>
+  </section>
 
   <script>
     function selectTopic(topic) {
-      document.getElementById('status').textContent = `You selected: ${topic}`;
+      // Hide menu, show topic page
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('topicPage').style.display = 'block';
+
+      // Set title and styled question
+      document.getElementById('topicTitle').textContent = `Topic: ${topic}`;
+      document.getElementById('question').innerHTML =
+        `Does this headline <b style="font-size:1.3em;">frame</b> ` +
+        `<b style="font-size:1.3em; text-decoration:underline;">${topic}</b> ` +
+        `as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
+    }
+
+    function goHome() {
+      document.getElementById('topicPage').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'block';
+    }
+
+    function nextHeadline() {
+      document.getElementById('headline').textContent =
+        `"Next placeholder headline…"`;
     }
   </script>
 </body>
+
 </html>
