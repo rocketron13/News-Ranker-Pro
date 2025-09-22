@@ -56,24 +56,32 @@
       position: relative; height: 26px; border-radius: 6px; background: #222; overflow: hidden;
       border: 1px solid #333;
     }
-    .results-fill {
-      position:absolute; top:0; left:0; height:100%;
-      display:flex; align-items:center; justify-content:flex-end;
-      padding-right:8px; font-weight:700; color:#111;
-      transition: width .35s ease;
+     .results-fill {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-weight: 700;
+      color: #111; /* dark text on bright neon */
       text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon);
-      background: var(--neon);
+      background: var(--neon); /* glowing cyan background */
       box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
+      transition: width .35s ease;
     }
+    
 
-      .results-bar {
+     .results-bar {
       position: relative;
       height: 26px;
       border-radius: 6px;
-      background: #111; /* faint dark track */
-      border: 1px solid #333; /* subtle outline */
+      background: #111;       /* dark empty track */
+      border: 1px solid #333; /* faint outline */
       overflow: hidden;
     }
+    
 
 
     .fill-strongly-anti   { background:#d32f2f; }
@@ -297,10 +305,10 @@
       const html = order.map(([key, label]) => {
         const pct = Math.round((counts[key] * 100) / total);
       
-        // If no votes, leave bar background but no neon fill
+        // If no votes → no neon fill
         const fillHtml = pct > 0
-          ? `<div class="results-fill fill-${key}" style="width:${pct}%;">${pct}%</div>`
-          : `<div class="results-fill" style="width:0; background:none; box-shadow:none;"></div>`;
+          ? `<div class="results-fill" style="width:${pct}%;">${pct}%</div>`
+          : ``;
       
         return `
           <div class="results-row">
@@ -312,11 +320,6 @@
         `;
       }).join('');
       
-            
-          
-      list.innerHTML = html;
-      box.style.display = 'block';
-    }
 
 
 
