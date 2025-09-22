@@ -189,41 +189,41 @@
        [2]: 'strongly_pro',
     };
     
-    // Listen for clicks on any classification button
-    document.getElementById('classificationButtons').addEventListener('click', (e) => {
+      // Listen for clicks on any classification button
+      document.getElementById('classificationButtons').addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
       const val = Number(btn.dataset.rating);
-      handleRating(val);
+      await handleRating(val);
     });
-    
-    // Save rating into Supabase
+  
     async function handleRating(val) {
-      if (!currentHeadline?.id || !currentTopicId) {
-        alert('Pick a topic first.'); return;
-      }
-    
+      const statusEl = document.getElementById('rateStatus');
+      if (!currentHeadline?.id) { alert('Pick a topic first.'); return; }
+  
       const payload = {
         headline_id: currentHeadline.id,
         stance_chosen: STANCE_ENUM[val],
         device_id: deviceId,
-        user_id: null    // optional until you add auth
+        user_id: null
+        // NOTE: actor_id is omitted on purpose (generated column on your table)
       };
-    
+  
       const { data, error } = await sb
         .from('ratings')
         .insert(payload)
         .select('id')
         .single();
-      
-      const statusEl = document.getElementById('rateStatus');
-      
+  
       if (error) {
         console.error(error);
         statusEl.textContent = 'Save failed: ' + error.message;
       } else {
-        statusEl.textContent = `Saved (id: ${data.id})`; // backticks, not quotes
+        statusEl.textContent = `Saved (id: ${data.id})`;
+        // optionally: auto-load next headline after a short pause
+        // setTimeout(nextHeadline, 300);
       }
+    }
 
 
   </script>
