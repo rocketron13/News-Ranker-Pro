@@ -50,6 +50,7 @@
     .strong-pro     { background: #388e3c; }
 
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
   <!-- Main Menu -->
@@ -85,7 +86,14 @@
     </div>
   </section>
 
+
   <script>
+
+    // Supabase connection
+    const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
+    const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
     function selectTopic(topic) {
       // Hide menu, show topic page
       document.getElementById('mainMenu').style.display = 'none';
