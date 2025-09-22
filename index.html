@@ -92,31 +92,28 @@
     // Supabase connection
     const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    document.addEventListener('DOMContentLoaded', testSupabase);
-
-
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
     // Test Supabase connection
     async function testSupabase() {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from('headlines')
         .select('headline')
         .limit(1);
-    
+  
       if (error) {
         console.error('Supabase error:', error.message);
         alert('Supabase error: ' + error.message);
-      } else if (data.length > 0) {
+      } else if (data && data.length) {
         console.log('Supabase data:', data);
         alert('Supabase connected! First headline: ' + data[0].headline);
       } else {
         alert('Supabase connected, but no headlines found.');
       }
     }
-    
-    // Run test as soon as page loads
+  
     document.addEventListener('DOMContentLoaded', testSupabase);
-    
+      
 
     
     function selectTopic(topic) {
