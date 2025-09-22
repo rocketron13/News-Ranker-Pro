@@ -50,45 +50,44 @@
     .strong-pro     { background: #388e3c; }
 
    /* This is for the results box styling. */
-    .results-row { margin: 8px 0; }
-    .results-label { display:block; margin-bottom:4px; color: var(--muted); font-size: 0.95rem; }
-    .results-bar {
-      position: relative; height: 26px; border-radius: 6px; background: #222; overflow: hidden;
-      border: 1px solid #333;
-    }
-     .results-fill {
-      position: absolute;
-      top: 0; left: 0;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 8px;
-      font-weight: 700;
-      color: #111; /* dark text on bright neon */
-      text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon);
-      background: var(--neon); /* glowing cyan background */
-      box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
-      transition: width .35s ease;
-    }
+    /* === Classification button colors (keep as before) === */
+    button.strong-anti    { background:#d32f2f; color:#fff; }
+    button.moderate-anti  { background:#f57c00; color:#fff; }
+    button.neutral        { background:#757575; color:#fff; }
+    button.moderate-pro   { background:#81c784; color:#111; }
+    button.strong-pro     { background:#388e3c; color:#fff; }
     
-
-     .results-bar {
+    /* === Poll results bars === */
+    .results-row { margin: 8px 0; }
+    .results-label {
+      display:block;
+      margin-bottom:4px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .results-bar {
       position: relative;
       height: 26px;
       border-radius: 6px;
-      background: #111;       /* dark empty track */
-      border: 1px solid #333; /* faint outline */
+      background: #111;       /* dark track */
+      border: 1px solid #333; /* subtle outline */
       overflow: hidden;
     }
-    
-
-
-    .fill-strongly-anti   { background:#d32f2f; }
-    .fill-moderately-anti { background:#f57c00; }
-    .fill-neutral         { background:#757575; }
-    .fill-moderately-pro  { background:#81c784; color:#0b2a12; }
-    .fill-strongly-pro    { background:#388e3c; }
+    .results-fill {
+      position:absolute;
+      top:0; left:0;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      padding-right:8px;
+      font-weight:700;
+      color:#111; /* dark text against neon */
+      text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon);
+      background: var(--neon);
+      box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
+      transition: width .35s ease;
+    }
     
 
     
