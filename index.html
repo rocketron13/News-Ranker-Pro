@@ -18,13 +18,19 @@
   </style>
 </head>
 <body>
-  <h1>Headline Game</h1>
+  <h1>Welcome to News Ranker</h1>
   <div class="card">
-    <p>Site is live. We’ll add logic next.</p>
-    <button id="testBtn">Click me</button>
+    <p>Select a News Topic to Rank:</p>
+    <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
+    <button onclick="selectTopic('Police')">Police</button>
+    <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
   </div>
+  <div id="status"></div>
+
   <script>
-    document.getElementById('testBtn').onclick = () => alert('Hello!');
+    function selectTopic(topic) {
+      document.getElementById('status').textContent = `You selected: ${topic}`;
+    }
   </script>
 </body>
 </html>
