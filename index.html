@@ -66,6 +66,16 @@
       box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
     }
 
+      .results-bar {
+      position: relative;
+      height: 26px;
+      border-radius: 6px;
+      background: #111; /* faint dark track */
+      border: 1px solid #333; /* subtle outline */
+      overflow: hidden;
+    }
+
+
     .fill-strongly-anti   { background:#d32f2f; }
     .fill-moderately-anti { background:#f57c00; }
     .fill-neutral         { background:#757575; }
@@ -286,20 +296,24 @@
       // Build bars (percent labels only; counts hidden for now)
       const html = order.map(([key, label]) => {
         const pct = Math.round((counts[key] * 100) / total);
-        // tiny visual for 0% so the label still has a background edge
-        const width = pct === 0 ? 0 : pct;
+      
+        // If no votes, leave bar background but no neon fill
+        const fillHtml = pct > 0
+          ? `<div class="results-fill fill-${key}" style="width:${pct}%;">${pct}%</div>`
+          : `<div class="results-fill" style="width:0; background:none; box-shadow:none;"></div>`;
+      
         return `
           <div class="results-row">
             <span class="results-label">${label}</span>
             <div class="results-bar">
-              <div class="results-fill fill-${key}" style="width:${width}%;">
-                ${pct}%
-              </div>
+              ${fillHtml}
             </div>
           </div>
         `;
       }).join('');
-    
+      
+            
+          
       list.innerHTML = html;
       box.style.display = 'block';
     }
