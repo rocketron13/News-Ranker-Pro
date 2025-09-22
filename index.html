@@ -93,6 +93,53 @@
     const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentTopicId = null;
+    let currentTopicTitle = null;
+    let currentHeadline = null;
+    
+    // Get a random headline for the selected topic
+    async function loadRandomHeadlineForTopic(topicTitle) {
+      // 1) Topic lookup (cache by title)
+      if (currentTopicTitle !== topicTitle) {
+        const { data: t, error: tErr } = await sb
+          .from('topics')
+          .select('id,title')
+          .eq('title', topicTitle)
+          .single();
+        if (tErr) return alert('Topic lookup error: ' + tErr.message);
+        currentTopicId = t.id;
+        currentTopicTitle = t.title;
+      }
+    
+      // 2) Count headlines for topic
+      const { count, error: cErr } = await sb
+        .from('headlines')
+        .select('id', { count: 'exact', head: true })
+        .eq('topic_id', currentTopicId);
+      if (cErr) return alert('Count error: ' + cErr.message);
+      if (!count) {
+        document.getElementById('headline').textContent = `"No headlines yet for ${topicTitle}."`;
+        return;
+      }
+    
+      // 3) Pick random offset and fetch one
+      const idx = Math.floor(Math.random() * count);
+      const { data: rows, error: hErr } = await sb
+        .from('headlines')
+        .select('id,text')
+        .eq('topic_id', currentTopicId)
+        .range(idx, idx);
+      if (hErr) return alert('Headline fetch error: ' + hErr.message);
+      if (!rows?.length) {
+        document.getElementById('headline').textContent = `"No headline found."`;
+        return;
+      }
+    
+      currentHeadline = rows[0]; // { id, text }
+      document.getElementById('headline').textContent = `"${rows[0].text}"`;
+    }
+
   
     // Test Supabase connection
     async function testSupabase() {
@@ -116,27 +163,29 @@
         
 
     
-    function selectTopic(topic) {
-      // Hide menu, show topic page
+    // Make selectTopic async and load a random headline
+    async function selectTopic(topic) {
       document.getElementById('mainMenu').style.display = 'none';
       document.getElementById('topicPage').style.display = 'block';
-
-      // Set title and styled question
       document.getElementById('topicTitle').textContent = `Topic: ${topic}`;
       document.getElementById('question').innerHTML =
         `Does this headline <b style="font-size:1.3em;">frame</b> ` +
         `<b style="font-size:1.3em; text-decoration:underline;">${topic}</b> ` +
         `as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
+    
+      await loadRandomHeadlineForTopic(topic);
     }
+
 
     function goHome() {
       document.getElementById('topicPage').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
     }
 
-    function nextHeadline() {
-      document.getElementById('headline').textContent =
-        `"Next placeholder headline…"`;
+    // Next Headline button -> fetch another random one
+    async function nextHeadline() {
+      if (!currentTopicTitle) return;
+      await loadRandomHeadlineForTopic(currentTopicTitle);
     }
   </script>
 </body>
