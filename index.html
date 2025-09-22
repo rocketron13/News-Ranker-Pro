@@ -205,7 +205,6 @@
     
       const payload = {
         headline_id: currentHeadline.id,
-        topic_id: currentTopicId,
         stance_chosen: STANCE_ENUM[val],
         device_id: deviceId,
         actor_id: null,  // optional until you need it
@@ -219,7 +218,7 @@
         console.error(error);
         statusEl.textContent = 'Save failed: ' + error.message;
       } else {
-        statusEl.textContent = 'Saved ✔';
+        statusEl.textContent = 'Saved (id: ${data[0].id})';
       }
     }
 
