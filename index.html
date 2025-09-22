@@ -210,16 +210,21 @@
         user_id: null    // optional until you add auth
       };
     
-      const { data, error } = await sb.from('ratings').insert(payload).select('id').single();
+      const { data, error } = await sb
+        .from('ratings')
+        .insert(payload)
+        .select('id')
+        .single();
+      
       const statusEl = document.getElementById('rateStatus');
-    
+      
       if (error) {
         console.error(error);
         statusEl.textContent = 'Save failed: ' + error.message;
       } else {
-        statusEl.textContent = 'Saved (id: ${data[0].id})';
+        statusEl.textContent = `Saved (id: ${data.id})`; // backticks, not quotes
       }
-    }
+
 
   </script>
 </body>
