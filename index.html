@@ -70,13 +70,15 @@
     <p id="question"></p>
     <blockquote id="headline">"Placeholder headline goes here."</blockquote>
 
-    <div id="classificationButtons">
-      <button class="strong-anti">Strongly Anti</button>
-      <button class="moderate-anti">Moderately Anti</button>
-      <button class="neutral">Neutral</button>
-      <button class="moderate-pro">Moderately Pro</button>
-      <button class="strong-pro">Strongly Pro</button>
-    </div>
+  <div id="classificationButtons">
+    <button class="strong-anti"    data-rating="-2">Strongly Anti</button>
+    <button class="moderate-anti"  data-rating="-1">Moderately Anti</button>
+    <button class="neutral"        data-rating="0">Neutral</button>
+    <button class="moderate-pro"   data-rating="1">Moderately Pro</button>
+    <button class="strong-pro"     data-rating="2">Strongly Pro</button>
+  </div>
+  <div id="rateStatus" style="margin-top:8px;color:var(--muted);"></div>
+
 
     <div style="margin-top:20px;">
       <button onclick="goHome()">Main Menu</button>
@@ -97,6 +99,15 @@
     let currentTopicId = null;
     let currentTopicTitle = null;
     let currentHeadline = null;
+
+
+    // at top of your <script>, after creating `sb`
+    let deviceId = localStorage.getItem('nr_device_id');
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem('nr_device_id', deviceId);
+    }
+
     
     // Get a random headline for the selected topic
     async function loadRandomHeadlineForTopic(topicTitle) {
@@ -168,6 +179,50 @@
       if (!currentTopicTitle) return;
       await loadRandomHeadlineForTopic(currentTopicTitle);
     }
+
+    // Map numeric buttons → enum labels
+    const STANCE_ENUM = {
+      [-2]: 'strongly_anti',
+      [-1]: 'moderately_anti',
+       [0]: 'neutral',
+       [1]: 'moderately_pro',
+       [2]: 'strongly_pro',
+    };
+    
+    // Listen for clicks on any classification button
+    document.getElementById('classificationButtons').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const val = Number(btn.dataset.rating);
+      handleRating(val);
+    });
+    
+    // Save rating into Supabase
+    async function handleRating(val) {
+      if (!currentHeadline?.id || !currentTopicId) {
+        alert('Pick a topic first.'); return;
+      }
+    
+      const payload = {
+        headline_id: currentHeadline.id,
+        topic_id: currentTopicId,
+        stance_chosen: STANCE_ENUM[val],
+        device_id: deviceId,
+        actor_id: null,  // optional until you need it
+        user_id: null    // optional until you add auth
+      };
+    
+      const { error } = await sb.from('ratings').insert(payload);
+      const statusEl = document.getElementById('rateStatus');
+    
+      if (error) {
+        console.error(error);
+        statusEl.textContent = 'Save failed: ' + error.message;
+      } else {
+        statusEl.textContent = 'Saved ✔';
+      }
+    }
+
   </script>
 </body>
 
