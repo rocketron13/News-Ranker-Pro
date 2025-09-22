@@ -79,7 +79,12 @@
   </div>
   <div id="rateStatus" style="margin-top:8px;color:var(--muted);"></div>
 
-
+ // Results box
+  <div id="results" class="card" style="display:none; margin-top:16px;">
+    <h3>Poll Results</h3>
+    <div id="resultsList"></div>
+  </div>
+    
     <div style="margin-top:20px;">
       <button onclick="goHome()">Main Menu</button>
       <button onclick="nextHeadline()">Next Headline</button>
@@ -177,6 +182,8 @@
     // Next Headline button -> fetch another random one
     async function nextHeadline() {
       if (!currentTopicTitle) return;
+      document.getElementById('rateStatus').textContent = '';
+      document.getElementById('results').style.display = 'none'; // hide results box
       await loadRandomHeadlineForTopic(currentTopicTitle);
     }
 
@@ -211,20 +218,50 @@
       const { data, error } = await sb.from('ratings').insert(payload).select('id').single();
     
       if (error) {
-        // 23505 = unique violation (already rated this headline on this device)
-        if (error.code === '23505') {
-          statusEl.textContent = 'Already rated. Loading next…';
-          await nextHeadline();
-          return;
-        }
-        console.error(error);
-        statusEl.textContent = 'Save failed: ' + error.message;
+        if (error.code === '23505') { statusEl.textContent = 'Already rated. Showing results…'; }
+        else { statusEl.textContent = 'Save failed: ' + error.message; return; }
+      } else {
+        statusEl.textContent = `Saved (id: ${data.id})`;
+      }
+    
+      // show results (includes the user’s vote)
+      await showResultsForCurrentHeadline();
+    }
+
+
+    async function showResultsForCurrentHeadline() {
+      if (!currentHeadline?.id) return;
+    
+      const { data, error } = await sb
+        .from('ratings')
+        .select('stance_chosen')            // pull stances for this headline
+        .eq('headline_id', currentHeadline.id);
+    
+      if (error) {
+        document.getElementById('resultsList').textContent = 'Error loading results.';
+        document.getElementById('results').style.display = 'block';
         return;
       }
     
-      statusEl.textContent = `Saved (id: ${data.id})`;
-      // optional: auto-advance after save
-      // setTimeout(nextHeadline, 300);
+      // Count votes per stance
+      const counts = { strongly_anti:0, moderately_anti:0, neutral:0, moderately_pro:0, strongly_pro:0 };
+      data.forEach(r => { counts[r.stance_chosen] = (counts[r.stance_chosen] ?? 0) + 1; });
+      const total = data.length || 1; // avoid divide-by-zero
+    
+      // Render simple list with percentages
+      const order = [
+        ['strongly_anti','Strongly Anti'],
+        ['moderately_anti','Moderately Anti'],
+        ['neutral','Neutral'],
+        ['moderately_pro','Moderately Pro'],
+        ['strongly_pro','Strongly Pro']
+      ];
+      const html = order.map(([k,label]) => {
+        const pct = Math.round((counts[k] * 100) / total);
+        return `<div>${label}: <b>${pct}%</b> (${counts[k]})</div>`;
+      }).join('');
+      document.getElementById('resultsList').innerHTML = html;
+      document.getElementById('results').style.display = 'block';
     }
 
 
