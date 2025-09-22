@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Headline Game</title>
+  <style>
+    :root { --neon:#0ff; --bg:#111; --card:#1b1b1b; --text:#eee; --muted:#aaa; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, Arial, sans-serif; background:var(--bg); color:var(--text);
+           max-width:720px; margin:2rem auto; padding:0 1rem; }
+    h1 { text-align:center; color:var(--neon); text-shadow:0 0 8px var(--neon),0 0 18px var(--neon); }
+    .card { background:var(--card); border:2px solid var(--neon); border-radius:14px;
+            padding:16px; margin:18px 0; box-shadow:0 0 16px rgba(0,255,255,.35); }
+    button { padding:10px 16px; border-radius:10px; border:2px solid var(--neon);
+             background:transparent; color:var(--neon); font-weight:700; cursor:pointer; }
+    button:hover { background:var(--neon); color:#102326; box-shadow:0 0 16px var(--neon); }
+  </style>
+</head>
+<body>
+  <h1>Headline Game</h1>
+  <div class="card">
+    <p>Site is live. We’ll add logic next.</p>
+    <button id="testBtn">Click me</button>
+  </div>
+  <script>
+    document.getElementById('testBtn').onclick = () => alert('Hello!');
+  </script>
+</body>
+</html>
