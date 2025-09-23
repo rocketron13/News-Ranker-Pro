@@ -162,33 +162,27 @@
     document.getElementById('usernameBtn').addEventListener('click', async () => {
       const msg = document.getElementById('usernameMsg');
       const raw = document.getElementById('usernameInput').value.trim();
-      const uname = raw.replace(/\s+/g, '_'); // normalize spaces → underscores
+      const uname = raw.replace(/\s+/g, '_');
     
       if (!uname) { msg.textContent = 'Please enter a username.'; return; }
     
-      // check if exists (case-insensitive)
-      const { data: existing, error: checkErr } = await sb
+      const { data: created, error } = await sb
         .from('players')
-        .select('id,username')
-        .ilike('username', uname)
-        .limit(1);
-      if (checkErr) { msg.textContent = 'Error: ' + checkErr.message; return; }
+        .insert({ username: uname, actor_id: crypto.randomUUID() })
+        .select('actor_id,username')
+        .single();
     
-      if (existing && existing.length) {
-        msg.textContent = 'That username is taken. Try another.';
+      if (error) {
+        if (error.code === '23505') {
+          msg.textContent = 'That username is already taken. Try another.';
+        } else {
+          msg.textContent = 'Error: ' + error.message;
+        }
         return;
       }
     
-      // create player
-      const { data: created, error: insErr } = await sb
-        .from('players')
-        .insert({ username: uname })
-        .select('id,username')
-        .single();
-      if (insErr) { msg.textContent = 'Save failed: ' + insErr.message; return; }
-    
-      // persist locally; unlock main menu
-      currentPlayerId = created.id;
+      // persist locally and proceed
+      currentPlayerId = created.actor_id;
       currentUsername = created.username;
       localStorage.setItem('nr_player_id', currentPlayerId);
       localStorage.setItem('nr_username', currentUsername);
@@ -196,8 +190,8 @@
       document.getElementById('usernameGate').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
     });
-
     
+        
     
     // Supabase connection
     const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
@@ -305,12 +299,13 @@
     const statusEl = document.getElementById('rateStatus');
     if (!currentHeadline?.id) { alert('Pick a topic first.'); return; }
 
-    const payload = {
+     const payload = {
       headline_id: currentHeadline.id,
       stance_chosen: STANCE_ENUM[val],
       device_id: deviceId,
-      user_id: currentPlayerId || null,   // use username-based player id
-    };
+      user_id: currentPlayerId || null,   // store actor_id here
+      };
+
 
 
     const { data, error } = await sb
