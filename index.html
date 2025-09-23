@@ -82,13 +82,40 @@
       box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
       transition: width .35s ease;
     }
-    
 
+    /* Top Banner Style*/
+      .top-banner{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 14px; margin:0 0 14px 0;
+      border-radius:12px; border:1px solid rgba(0,255,255,.4);
+      background: linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,255,.02));
+      box-shadow: 0 0 12px rgba(0,255,255,.18), inset 0 0 10px rgba(0,255,255,.08);
+    }
+    .banner-actions{ display:flex; gap:10px; }
+    .banner-btn{
+      padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer;
+      border:1px solid var(--neon); color:var(--neon); background:transparent;
+    }
+    .banner-btn:hover{ background:var(--neon); color:#102326; box-shadow:0 0 12px var(--neon); }
+    .banner-btn.secondary{ border-color: var(--muted); color: var(--muted); }
+    .banner-btn.secondary:hover{ background: var(--muted); color:#111; box-shadow:none; }
+  
+
+    
     
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+// Top Banner
+  <div id="topBanner" class="top-banner">
+  <span id="activeUser">Signed in as —</span>
+  <div class="banner-actions">
+    <button id="gameInfoBtn" class="banner-btn">Game Info</button>
+    <button id="changeUserBtn" class="banner-btn secondary">Change User</button>
+  </div>
+</div>
 
   // User Name Unique
   <section id="usernameGate" class="card" style="display:block;>
@@ -177,6 +204,26 @@
     });
     
 
+      // Game Info (simple placeholder; swap for a modal later)
+      document.getElementById('gameInfoBtn').addEventListener('click', () => {
+        alert(
+          'News Ranker: Pick a topic, read a headline, and classify the framing. ' +
+          'Your vote updates the live poll. Change User to test as different players.'
+        );
+      });
+      
+      // Change User (keep or replace your existing handler with this)
+      document.getElementById('changeUserBtn').addEventListener('click', () => {
+        localStorage.removeItem('nr_player_id');
+        localStorage.removeItem('nr_username');
+        currentPlayerId = null;
+        currentUsername = null;
+        updateActiveUserLabel();
+        document.getElementById('mainMenu').style.display = 'none';
+        document.getElementById('usernameGate').style.display = 'block';
+      });
+      
+      
     
 
     // All this is about getting the user to enter thier ID
