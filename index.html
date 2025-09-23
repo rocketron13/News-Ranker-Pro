@@ -89,8 +89,19 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+  // User Name Unique
+  <section id="usernameGate" class="card">
+  <h2>Enter a Username to Start</h2>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <input id="usernameInput" type="text" placeholder="Choose a unique username" style="flex:1;">
+    <button id="usernameBtn">Continue</button>
+  </div>
+  <div id="usernameMsg" style="margin-top:8px; color:var(--muted);"></div>
+</section>
+
   <!-- Main Menu -->
-  <section id="mainMenu">
+  <section id="mainMenu" style="display:none;">
     <h1>Welcome to News Ranker</h1>
     <div class="card">
       <p>Select a News Topic to Rank:</p>
@@ -132,6 +143,62 @@
 
   <script>
 
+    // This is about user ID
+    let currentPlayerId = localStorage.getItem('nr_player_id');
+    let currentUsername = localStorage.getItem('nr_username');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (currentPlayerId && currentUsername) {
+        document.getElementById('usernameGate').style.display = 'none';
+        document.getElementById('mainMenu').style.display = 'block';
+      } else {
+        document.getElementById('usernameGate').style.display = 'block';
+        document.getElementById('mainMenu').style.display = 'none';
+      }
+    });
+
+
+    // All this is about getting the user to enter thier ID
+    document.getElementById('usernameBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('usernameMsg');
+      const raw = document.getElementById('usernameInput').value.trim();
+      const uname = raw.replace(/\s+/g, '_'); // normalize spaces → underscores
+    
+      if (!uname) { msg.textContent = 'Please enter a username.'; return; }
+    
+      // check if exists (case-insensitive)
+      const { data: existing, error: checkErr } = await sb
+        .from('players')
+        .select('id,username')
+        .ilike('username', uname)
+        .limit(1);
+      if (checkErr) { msg.textContent = 'Error: ' + checkErr.message; return; }
+    
+      if (existing && existing.length) {
+        msg.textContent = 'That username is taken. Try another.';
+        return;
+      }
+    
+      // create player
+      const { data: created, error: insErr } = await sb
+        .from('players')
+        .insert({ username: uname })
+        .select('id,username')
+        .single();
+      if (insErr) { msg.textContent = 'Save failed: ' + insErr.message; return; }
+    
+      // persist locally; unlock main menu
+      currentPlayerId = created.id;
+      currentUsername = created.username;
+      localStorage.setItem('nr_player_id', currentPlayerId);
+      localStorage.setItem('nr_username', currentUsername);
+    
+      document.getElementById('usernameGate').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'block';
+    });
+
+    
+    
     // Supabase connection
     const SUPABASE_URL = 'https://yjgzdeqolyuzuygyvdmz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqZ3pkZXFvbHl1enV5Z3l2ZG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NjcyMTQsImV4cCI6MjA3NDA0MzIxNH0.8H1t3ThpRtFLavN3tn8lxS89RfQUwvBKE80wzwSKDdY';
@@ -242,9 +309,9 @@
       headline_id: currentHeadline.id,
       stance_chosen: STANCE_ENUM[val],
       device_id: deviceId,
-      user_id: null
-      // NOTE: actor_id omitted (generated on your table)
+      user_id: currentPlayerId || null,   // use username-based player id
     };
+
 
     const { data, error } = await sb
       .from('ratings')
