@@ -103,13 +103,16 @@
   <!-- Main Menu -->
   <section id="mainMenu" style="display:none;">
     <h1>Welcome to News Ranker</h1>
-    <div class="card">
-      <p>Select a News Topic to Rank:</p>
-      <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
-      <button onclick="selectTopic('Police')">Police</button>
-      <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
+    <p>Select a News Topic to Rank:</p>
+    <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
+    <button onclick="selectTopic('Police')">Police</button>
+    <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
+  
+    <div style="margin-top:20px;">
+      <button id="changeUserBtn">Change User</button>
     </div>
   </section>
+  
 
   <!-- Topic Page -->
   <section id="topicPage" style="display:none;">
@@ -157,6 +160,20 @@
       }
     });
 
+    document.getElementById('changeUserBtn').addEventListener('click', () => {
+      // clear local user info
+      localStorage.removeItem('nr_player_id');
+      localStorage.removeItem('nr_username');
+      currentPlayerId = null;
+      currentUsername = null;
+    
+      // switch screens
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('usernameGate').style.display = 'block';
+    });
+    
+
+    
 
     // All this is about getting the user to enter thier ID
     document.getElementById('usernameBtn').addEventListener('click', async () => {
