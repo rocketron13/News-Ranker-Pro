@@ -184,9 +184,9 @@
       const msg = document.getElementById('usernameMsg');
       const raw = document.getElementById('usernameInput').value.trim();
       const uname = raw.replace(/\s+/g, '_');
-    
       if (!uname) { msg.textContent = 'Please enter a username.'; return; }
     
+      // 1) Try to create the user
       const { data: created, error } = await sb
         .from('players')
         .insert({ username: uname, actor_id: crypto.randomUUID() })
@@ -194,25 +194,34 @@
         .single();
     
       if (error) {
+        // 23505 = unique violation → username already exists → fetch it
         if (error.code === '23505') {
-          msg.textContent = 'That username is already taken. Try another.';
+          const { data: existing, error: fetchErr } = await sb
+            .from('players')
+            .select('actor_id,username')
+            .ilike('username', uname)  // case-insensitive exact match (unique index guarantees 1 row)
+            .single();
+    
+          if (fetchErr) { msg.textContent = 'Error: ' + fetchErr.message; return; }
+    
+          currentPlayerId = existing.actor_id;
+          currentUsername = existing.username;
         } else {
           msg.textContent = 'Error: ' + error.message;
+          return;
         }
-        return;
+      } else {
+        currentPlayerId = created.actor_id;
+        currentUsername = created.username;
       }
     
-      // persist locally and proceed
-      currentPlayerId = created.actor_id;
-      currentUsername = created.username;
       localStorage.setItem('nr_player_id', currentPlayerId);
       localStorage.setItem('nr_username', currentUsername);
-
       updateActiveUserLabel();
-    
       document.getElementById('usernameGate').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
     });
+
     
         
     
