@@ -126,7 +126,7 @@
 
   <!-- Main Menu -->
   <section id="mainMenu" style="display:none;">
-    <p id="activeUser" style="margin:8px 0; color:var(--muted);">Signed in as —</p>
+   
     <h1>Welcome to News Ranker</h1>
     <p>Select a News Topic to Rank:</p>
     <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
@@ -142,7 +142,7 @@
   <!-- Topic Page -->
   <section id="topicPage" style="display:none;">
     <h2 id="topicTitle"></h2>
-    <p id="question"></p>
+    <p id="question" style="display:none;></p>
     <blockquote id="headline">"Placeholder headline goes here."</blockquote>
 
   <div id="classificationButtons">
@@ -340,14 +340,20 @@
     document.getElementById('mainMenu').style.display = 'none';
     document.getElementById('topicPage').style.display = 'block';
     document.getElementById('topicTitle').textContent = `Topic: ${topic}`;
-    document.getElementById('question').innerHTML =
-      `Does this headline <b style="font-size:1.3em;">frame</b> ` +
-      `<b style="font-size:1.3em; text-decoration:underline;">${topic}</b> ` +
-      `as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
+  
+    // Add const q and also unhide it
+    const q = document.getElementById('question');
+    q.innerHTML =
+      `Does this headline <b style="font-size:1.3em;">frame</b> 
+      <b style="font-size:1.3em; text-decoration:underline;">${topic}</b> 
+      as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
+    q.style.display = 'block';
+  
     document.getElementById('rateStatus').textContent = '';
     document.getElementById('results').style.display = 'none';
     await loadRandomHeadlineForTopic(topic);
   }
+
 
   function goHome() {
     document.getElementById('topicPage').style.display = 'none';
