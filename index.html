@@ -91,7 +91,7 @@
 <body>
 
   // User Name Unique
-  <section id="usernameGate" class="card">
+  <section id="usernameGate" class="card" style="display:block;>
   <h2>Enter a Username to Start</h2>
   <div style="display:flex; gap:8px; align-items:center;">
     <input id="usernameInput" type="text" placeholder="Choose a unique username" style="flex:1;">
@@ -102,6 +102,7 @@
 
   <!-- Main Menu -->
   <section id="mainMenu" style="display:none;">
+    <p id="activeUser" style="margin:8px 0; color:var(--muted);">Signed in as —</p>
     <h1>Welcome to News Ranker</h1>
     <p>Select a News Topic to Rank:</p>
     <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
@@ -158,6 +159,7 @@
         document.getElementById('usernameGate').style.display = 'block';
         document.getElementById('mainMenu').style.display = 'none';
       }
+      updateActiveUserLabel();
     });
 
     document.getElementById('changeUserBtn').addEventListener('click', () => {
@@ -166,6 +168,8 @@
       localStorage.removeItem('nr_username');
       currentPlayerId = null;
       currentUsername = null;
+
+      updateActiveUserLabel();
     
       // switch screens
       document.getElementById('mainMenu').style.display = 'none';
@@ -203,6 +207,8 @@
       currentUsername = created.username;
       localStorage.setItem('nr_player_id', currentPlayerId);
       localStorage.setItem('nr_username', currentUsername);
+
+      updateActiveUserLabel();
     
       document.getElementById('usernameGate').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
@@ -269,6 +275,12 @@
     currentHeadline = rows[0];
     document.getElementById('headline').textContent = `"${rows[0].text}"`;
   }
+
+  function updateActiveUserLabel() {
+    const el = document.getElementById('activeUser');
+    el.textContent = currentUsername ? `Signed in as ${currentUsername}` : 'Signed in as —';
+  }
+
 
   // --- UI actions ---
   async function selectTopic(topic) {
