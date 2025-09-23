@@ -140,7 +140,7 @@
   <!-- Topic Page -->
   <section id="topicPage" style="display:none;">
     <h2 id="topicTitle"></h2>
-    <p id="question" style="display:none;></p>
+    <p id="question" style="display:none;"></p>
     <blockquote id="headline">"Placeholder headline goes here."</blockquote>
 
   <div id="classificationButtons">
@@ -341,11 +341,11 @@
   
     // Add const q and also unhide it
     const q = document.getElementById('question');
-    q.innerHTML =
-      `Does this headline <b style="font-size:1.3em;">frame</b> 
-      <b style="font-size:1.3em; text-decoration:underline;">${topic}</b> 
+    q.innerHTML = `Does this headline <b style="font-size:1.3em;">frame</b>
+      <b style="font-size:1.3em; text-decoration:underline;">${topic}</b>
       as good (PRO), bad (ANTI), or neither (NEUTRAL)?`;
     q.style.display = 'block';
+
   
     document.getElementById('rateStatus').textContent = '';
     document.getElementById('results').style.display = 'none';
