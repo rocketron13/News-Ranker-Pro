@@ -118,7 +118,13 @@
     }
 
 
-
+    #headlineMeta {
+      font-size: 1.1rem;                /* larger */
+      color: var(--neon);               /* neon cyan */
+      text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon); /* glow */
+      font-weight: bold;
+    }
+    
     
     
   </style>
@@ -461,7 +467,7 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     if (currentHeadline) {
       const pub = currentHeadline.publication || 'Unknown publication';
       const date = currentHeadline.pub_date || 'Unknown date';
-      metaEl.textContent = `Publication: ${pub} \nDate Published: ${date}`;
+      metaEl.innerHTML = `${pub}<br>${date}`;
       metaEl.style.display = 'block';
     }
   }
