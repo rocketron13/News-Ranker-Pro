@@ -80,7 +80,11 @@
       text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon);
       background: var(--neon);
       box-shadow: 0 0 12px var(--neon), inset 0 0 8px rgba(0,255,255,.6);
-      transition: width .35s ease;
+      transition: width .6s ease-out;
+    }
+
+      @media (prefers-reduced-motion: reduce) {
+      .results-fill { transition: none; }
     }
 
     /* Top Banner Style*/
@@ -446,24 +450,33 @@
       ['strongly_pro','Strongly Pro']
     ];
 
+    // Build bars (render at 0% first, then animate)
     const html = order.map(([key, label]) => {
       const pct = Math.round((counts[key] * 100) / total);
-      const fillHtml = pct > 0
-        ? `<div class="results-fill" style="width:${pct}%;">${pct}%</div>`
+      const fill = pct > 0
+        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}%</div>`
         : ``;
       return `
         <div class="results-row">
           <span class="results-label">${label}</span>
           <div class="results-bar">
-            ${fillHtml}
+            ${fill}
           </div>
         </div>
       `;
     }).join('');
-
+    
     list.innerHTML = html;
     box.style.display = 'block';
-  }
+    
+    // Kick off the animation
+    requestAnimationFrame(() => {
+      document.querySelectorAll('#results .results-fill').forEach(el => {
+        const pct = el.getAttribute('data-target');
+        el.style.width = pct + '%';
+      });
+    });
+
 </script>
 </body>
 
