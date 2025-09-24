@@ -159,7 +159,7 @@
   <section id="topicPage" style="display:none;">
     <h2 id="topicTitle"></h2>
     <p id="question" style="display:none;"></p>
-    <blockquote id="headline">"Placeholder  goes here."</blockquote>
+    <blockquote id="headline"></blockquote>
     
 
 
@@ -379,6 +379,10 @@ async function loadRandomHeadlineForTopic(topicTitle) {
   
     document.getElementById('rateStatus').textContent = '';
     document.getElementById('results').style.display = 'none';
+
+    const h = document.getElementById('headline');
+    h.textContent = 'Loading…';
+
     await loadRandomHeadlineForTopic(topic);
   }
 
