@@ -104,16 +104,19 @@
 
 
     #headline {
-      margin-top: 20px;      /* more space above */
-      margin-bottom: 36px;   /* more space below */
+      margin-top: 20px;
+      margin-bottom: 36px;
       font-size: 1.1rem;
       line-height: 1.4;
-    
-      border: 2px solid var(--neon); /* neon cyan outline */
-      box-shadow: 0 0 8px var(--neon), 0 0 16px var(--neon); /* glowing effect */
-      padding: 12px 16px; /* breathing room inside the border */
+      border: 2px solid var(--neon);
+      box-shadow: 0 0 8px var(--neon), 0 0 16px var(--neon);
+      padding: 12px 16px;
       border-radius: 8px;
+    
+      word-wrap: break-word;   /* ensure no overflow from very long words */
+      white-space: normal;     /* let it wrap normally */
     }
+
 
 
     
@@ -160,6 +163,8 @@
     <h2 id="topicTitle"></h2>
     <p id="question" style="display:none;"></p>
     <blockquote id="headline"></blockquote>
+    <p id="headlineMeta" style="display:none; margin-top:8px; font-size:0.9rem; color:var(--muted);"></p>
+
     
 
 
@@ -340,7 +345,7 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     const idx = Math.floor(Math.random() * count);
     const { data: rows, error: hErr } = await sb
       .from('headlines')
-      .select('id,text')
+      .select('id,text,publication,pub_date')
       .eq('topic_id', currentTopicId)
       .range(idx, idx);
     if (hErr) { alert('Headline fetch error: ' + hErr.message); return; }
@@ -351,6 +356,8 @@ async function loadRandomHeadlineForTopic(topicTitle) {
 
     currentHeadline = rows[0];
     document.getElementById('headline').textContent = `"${rows[0].text}"`;
+    const metaEl = document.getElementById('headlineMeta');
+    if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; 
   } finally {
     isLoadingHeadline = false;          //  always release
   }
@@ -448,6 +455,14 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     }
 
     await showResultsForCurrentHeadline();
+
+    const metaEl = document.getElementById('headlineMeta');
+    if (currentHeadline) {
+      const pub = currentHeadline.publication || 'Unknown publication';
+      const date = currentHeadline.pub_date || 'Unknown date';
+      metaEl.textContent = `Publication: ${pub} \nDate Published: ${date}`;
+      metaEl.style.display = 'block';
+    }
   }
 
   // --- Results (neon bars) ---
