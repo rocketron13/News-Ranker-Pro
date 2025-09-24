@@ -188,7 +188,8 @@
 
 
   <script>
-
+   
+    
     // This is about user ID
     let currentPlayerId = localStorage.getItem('nr_player_id');
     let currentUsername = localStorage.getItem('nr_username');
@@ -297,7 +298,9 @@
   let currentTopicId = null;
   let currentTopicTitle = null;
   let currentHeadline = null;
+  let isLoadingHeadline = false;
 
+    
   // Stable device id (no auth yet)
   let deviceId = localStorage.getItem('nr_device_id');
   if (!deviceId) {
@@ -306,7 +309,12 @@
   }
 
   // --- Data helpers ---
-  async function loadRandomHeadlineForTopic(topicTitle) {
+let isLoadingHeadline = false; // put near your globals
+
+async function loadRandomHeadlineForTopic(topicTitle) {
+  if (isLoadingHeadline) return;        //  guard
+  isLoadingHeadline = true;
+  try {
     // (1) Topic lookup (cache)
     if (currentTopicTitle !== topicTitle) {
       const { data: t, error: tErr } = await sb
@@ -319,7 +327,7 @@
       currentTopicTitle = t.title;
     }
 
-    // (2) Count headlines
+    // (2) Count + random pick (unchanged)
     const { count, error: cErr } = await sb
       .from('headlines')
       .select('id', { count: 'exact', head: true })
@@ -330,7 +338,6 @@
       return;
     }
 
-    // (3) Random fetch
     const idx = Math.floor(Math.random() * count);
     const { data: rows, error: hErr } = await sb
       .from('headlines')
@@ -345,7 +352,11 @@
 
     currentHeadline = rows[0];
     document.getElementById('headline').textContent = `"${rows[0].text}"`;
+  } finally {
+    isLoadingHeadline = false;          //  always release
   }
+}
+
 
   function updateActiveUserLabel() {
     const el = document.getElementById('activeUser');
