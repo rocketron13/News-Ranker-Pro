@@ -358,7 +358,8 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     document.getElementById('headline').textContent = `"${rows[0].text}"`;
     const metaEl = document.getElementById('headlineMeta');
     if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; 
-  } finally {
+     }
+ } finally {
     isLoadingHeadline = false;          //  always release
   }
 }
