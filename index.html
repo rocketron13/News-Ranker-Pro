@@ -102,7 +102,14 @@
     }
     .banner-btn:hover{ background:var(--neon); color:#102326; box-shadow:0 0 12px var(--neon); }
 
-  
+
+    #headline {
+      margin: 16px 0;  /* top & bottom spacing */
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+
+    
     
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -145,7 +152,7 @@
   <section id="topicPage" style="display:none;">
     <h2 id="topicTitle"></h2>
     <p id="question" style="display:none;"></p>
-    <blockquote id="headline">"Placeholder headline goes here."</blockquote>
+    <blockquote id="">"Placeholder  goes here."</blockquote>
 
   <div id="classificationButtons">
     <button class="strong-anti"    data-rating="-2">Strongly Anti</button>
@@ -158,13 +165,13 @@
 
  <!-- Results box -->
   <div id="results" class="card" style="display:none; margin-top:16px;">
-    <h3>This is How Other People Ranked this Headline</h3>
+    <h3>This is How Other People Ranked this </h3>
     <div id="resultsList"></div>
   </div>
     
     <div style="margin-top:20px;">
       <button onclick="goHome()">Main Menu</button>
-      <button onclick="nextHeadline()">Next Headline</button>
+      <button onclick="next()">Next </button>
 
       
     </div>
