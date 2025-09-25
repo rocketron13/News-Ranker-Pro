@@ -124,8 +124,20 @@
       text-shadow: 0 0 1px var(--neon), 0 0 12px var(--neon); /* glow */
       font-weight: bold;
     }
-    
-    
+
+    /* No More Headlines Style*/
+      .notice-neon{
+      border:2px solid var(--neon);
+      border-radius:12px;
+      padding:14px;
+      background:linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,255,.02));
+      box-shadow:0 0 16px rgba(0,255,255,.25), inset 0 0 10px rgba(0,255,255,.08);
+      color:var(--neon);
+      font-weight:700;
+      text-shadow:0 0 4px var(--neon);
+    }
+    .notice-neon .topic-choices { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+
     
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -195,6 +207,17 @@
 
       
     </div>
+
+    <div id="noMoreBox" class="notice-neon" style="display:none; margin-top:16px;">
+    <div id="noMoreMsg">No new headlines left for this topic.</div>
+    <p style="margin:10px 0 6px;">Select a News Topic to Rank:</p>
+    <div class="topic-choices">
+      <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
+      <button onclick="selectTopic('Police')">Police</button>
+      <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
+    </div>
+  </div>
+
   </section>
 
 
@@ -388,18 +411,23 @@
       if (cErr) { alert('Count error: ' + cErr.message); return; }
   
       if (!count) {
-        // No more new headlines for this user in this topic
-        document.getElementById('headline').textContent =
-          `"No new headlines left for ${topicTitle}."`;
+        // hide headline, buttons, results, meta because no new headlines for the topic
+        document.getElementById('headline').style.display = 'none';
+        document.getElementById('classificationButtons').style.display = 'none';
         const metaEl = document.getElementById('headlineMeta');
         if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; }
-        // Hide results box too
         const resultsBox = document.getElementById('results');
         const resultsList = document.getElementById('resultsList');
         if (resultsBox && resultsList) { resultsList.innerHTML = ''; resultsBox.style.display = 'none'; }
+      
+        // show neon notice with custom message
+        const noMore = document.getElementById('noMoreBox');
+        const msg = document.getElementById('noMoreMsg');
+        msg.textContent = `No new headlines left for ${topicTitle}.`;
+        noMore.style.display = 'block';
         return;
       }
-  
+        
       // 4) Pick a random UNRATED headline and fetch it (with meta)
       const idx = Math.floor(Math.random() * count);
   
@@ -430,6 +458,12 @@
       const resultsBox = document.getElementById('results');
       const resultsList = document.getElementById('resultsList');
       if (resultsBox && resultsList) { resultsList.innerHTML = ''; resultsBox.style.display = 'none'; }
+
+      // show main elements again, hide the notice
+      document.getElementById('headline').style.display = 'block';
+      document.getElementById('classificationButtons').style.display = 'flex';
+      document.getElementById('noMoreBox').style.display = 'none';
+      
     } finally {
       isLoadingHeadline = false;     // always release
     }
