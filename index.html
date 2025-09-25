@@ -339,54 +339,102 @@
 
   // --- Data helpers ---
 
-async function loadRandomHeadlineForTopic(topicTitle) {
-  if (isLoadingHeadline) return;        //  guard
-  isLoadingHeadline = true;
-  try {
-    // (1) Topic lookup (cache)
-    if (currentTopicTitle !== topicTitle) {
-      const { data: t, error: tErr } = await sb
-        .from('topics')
-        .select('id,title')
-        .eq('title', topicTitle)
-        .single();
-      if (tErr) { alert('Topic lookup error: ' + tErr.message); return; }
-      currentTopicId = t.id;
-      currentTopicTitle = t.title;
-    }
 
-    // (2) Count + random pick (unchanged)
-    const { count, error: cErr } = await sb
-      .from('headlines')
-      .select('id', { count: 'exact', head: true })
-      .eq('topic_id', currentTopicId);
-    if (cErr) { alert('Count error: ' + cErr.message); return; }
-    if (!count) {
-      document.getElementById('headline').textContent = `"No headlines yet for ${topicTitle}."`;
-      return;
-    }
 
-    const idx = Math.floor(Math.random() * count);
-    const { data: rows, error: hErr } = await sb
-      .from('headlines')
-      .select('id,text,publication,pub_date')
-      .eq('topic_id', currentTopicId)
-      .range(idx, idx);
-    if (hErr) { alert('Headline fetch error: ' + hErr.message); return; }
-    if (!rows?.length) {
-      document.getElementById('headline').textContent = `"No headline found."`;
-      return;
+  async function loadRandomHeadlineForTopic(topicTitle) {
+    if (isLoadingHeadline) return;   // guard against double-calls
+    isLoadingHeadline = true;
+    try {
+      // 1) Topic lookup (cache)
+      if (currentTopicTitle !== topicTitle) {
+        const { data: t, error: tErr } = await sb
+          .from('topics')
+          .select('id,title')
+          .eq('title', topicTitle)
+          .single();
+        if (tErr) { alert('Topic lookup error: ' + tErr.message); return; }
+        currentTopicId = t.id;
+        currentTopicTitle = t.title;
+      }
+  
+      // 2) Find headline IDs this USER has already rated
+      if (!currentPlayerId) {
+        // safety: require a user
+        document.getElementById('headline').textContent = `"Please enter a username to start."`;
+        const metaEl = document.getElementById('headlineMeta');
+        if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; }
+        return;
+      }
+  
+      const { data: ratedRows, error: rErr } = await sb
+        .from('ratings')
+        .select('headline_id')
+        .eq('user_id', currentPlayerId);
+  
+      if (rErr) { alert('Ratings fetch error: ' + rErr.message); return; }
+  
+      const ratedIds = (ratedRows || []).map(r => r.headline_id);
+      // Build NOT IN list for PostgREST when needed
+      const notIn = ratedIds.length ? `(${ratedIds.map(id => `"${id}"`).join(',')})` : null;
+  
+      // 3) Count UNRATED headlines for this topic
+      let countQuery = sb
+        .from('headlines')
+        .select('id', { count: 'exact', head: true })
+        .eq('topic_id', currentTopicId);
+      if (notIn) countQuery = countQuery.not('id', 'in', notIn);
+  
+      const { count, error: cErr } = await countQuery;
+      if (cErr) { alert('Count error: ' + cErr.message); return; }
+  
+      if (!count) {
+        // No more new headlines for this user in this topic
+        document.getElementById('headline').textContent =
+          `"No new headlines left for ${topicTitle}."`;
+        const metaEl = document.getElementById('headlineMeta');
+        if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; }
+        // Hide results box too
+        const resultsBox = document.getElementById('results');
+        const resultsList = document.getElementById('resultsList');
+        if (resultsBox && resultsList) { resultsList.innerHTML = ''; resultsBox.style.display = 'none'; }
+        return;
+      }
+  
+      // 4) Pick a random UNRATED headline and fetch it (with meta)
+      const idx = Math.floor(Math.random() * count);
+  
+      let pickQuery = sb
+        .from('headlines')
+        .select('id,text,publication,pub_date')
+        .eq('topic_id', currentTopicId)
+        .range(idx, idx);
+      if (notIn) pickQuery = pickQuery.not('id', 'in', notIn);
+  
+      const { data: rows, error: hErr } = await pickQuery;
+      if (hErr) { alert('Headline fetch error: ' + hErr.message); return; }
+      if (!rows?.length) {
+        document.getElementById('headline').textContent = `"No headline found."`;
+        const metaEl = document.getElementById('headlineMeta');
+        if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; }
+        return;
+      }
+  
+      // 5) Render headline + reset meta
+      currentHeadline = rows[0];
+      document.getElementById('headline').textContent = `"${rows[0].text}"`;
+  
+      const metaEl = document.getElementById('headlineMeta');
+      if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; }
+  
+      // Also clear the results box when loading a new headline
+      const resultsBox = document.getElementById('results');
+      const resultsList = document.getElementById('resultsList');
+      if (resultsBox && resultsList) { resultsList.innerHTML = ''; resultsBox.style.display = 'none'; }
+    } finally {
+      isLoadingHeadline = false;     // always release
     }
-
-    currentHeadline = rows[0];
-    document.getElementById('headline').textContent = `"${rows[0].text}"`;
-    const metaEl = document.getElementById('headlineMeta');
-    if (metaEl) { metaEl.style.display = 'none'; metaEl.textContent = ''; 
-     }
- } finally {
-    isLoadingHeadline = false;          //  always release
   }
-}
+
 
 
   function updateActiveUserLabel() {
