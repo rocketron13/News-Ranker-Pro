@@ -236,7 +236,15 @@
         metaEl.textContent = '';
         metaEl.style.display = 'none';
       }
-          
+
+    // clear poll results
+      const resultsBox = document.getElementById('results');
+      const resultsList = document.getElementById('resultsList');
+      if (resultsBox && resultsList) {
+        resultsList.innerHTML = '';
+        resultsBox.style.display = 'none';
+      }
+      
       document.getElementById('usernameGate').style.display = 'block';
     });
     
