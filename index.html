@@ -524,7 +524,7 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     const html = order.map(([key, label]) => {
       const pct = Math.round((counts[key] * 100) / total);
       const fill = pct > 0
-        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}% (${count})</div>`
+        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}%</div>`
         : ``;
       return `
         <div class="results-row">
