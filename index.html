@@ -536,9 +536,7 @@ async function loadRandomHeadlineForTopic(topicTitle) {
       `;
     }).join('');
     
-    list.innerHTML = html + `<div style="margin-top:6px;color:var(--muted);font-size:.85rem;">
-      Debug: counts shown for testing; will be removed later.
-      </div>`;
+    list.innerHTML = html;
     box.style.display = 'block';
     
     // Kick off the animation
