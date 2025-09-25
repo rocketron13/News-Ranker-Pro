@@ -523,8 +523,9 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     // Build bars (render at 0% first, then animate)
     const html = order.map(([key, label]) => {
       const pct = Math.round((counts[key] * 100) / total);
+      const count = counts[key] || 0;
       const fill = pct > 0
-        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}%</div>`
+        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}% (${count})</div>`
         : ``;
       return `
         <div class="results-row">
