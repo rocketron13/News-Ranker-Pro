@@ -227,6 +227,16 @@
     
       // switch screens
       document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('topicPage').style.display = 'none';
+      document.getElementById('results').style.display = 'none';
+
+    // clear headline meta so new user doesn’t see old context
+      const metaEl = document.getElementById('headlineMeta');
+      if (metaEl) {
+        metaEl.textContent = '';
+        metaEl.style.display = 'none';
+      }
+          
       document.getElementById('usernameGate').style.display = 'block';
     });
     
