@@ -524,7 +524,7 @@ async function loadRandomHeadlineForTopic(topicTitle) {
     const html = order.map(([key, label]) => {
       const pct = Math.round((counts[key] * 100) / total);
       const fill = pct > 0
-        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}%</div>`
+        ? `<div class="results-fill" data-target="${pct}" style="width:0%;">${pct}% (${count})</div>`
         : ``;
       return `
         <div class="results-row">
@@ -536,7 +536,9 @@ async function loadRandomHeadlineForTopic(topicTitle) {
       `;
     }).join('');
     
-    list.innerHTML = html;
+    list.innerHTML = html + `<div style="margin-top:6px;color:var(--muted);font-size:.85rem;">
+      Debug: counts shown for testing; will be removed later.
+      </div>`;
     box.style.display = 'block';
     
     // Kick off the animation
