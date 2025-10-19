@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <style>
+    :root { --neon:#0ff; --bg:#111; --card:#1b1b1b; --text:#eee; --muted:#aaa; }
+    body { font-family: system-ui, sans-serif; background:var(--bg); color:var(--text);
+           max-width:720px; margin:2rem auto; padding:0 1rem; }
+    h1 { text-align:center; color:var(--neon); text-shadow:0 0 8px var(--neon),0 0 18px var(--neon); }
+    .card { background:var(--card); border:2px solid var(--neon); border-radius:14px;
+            padding:16px; margin:18px 0; box-shadow:0 0 16px rgba(0,255,255,.35); }
+    .results-row { margin:8px 0; }
+    .results-label { display:block; margin-bottom:4px; color:var(--muted); font-size:0.95rem; }
+    .results-bar { position:relative; height:26px; border-radius:6px; background:#111;
+                   border:1px solid #333; overflow:hidden; }
+    .results-fill { position:absolute; top:0; left:0; height:100%; display:flex; align-items:center;
+                    justify-content:flex-end; padding-right:8px; font-weight:700; color:#111;
+                    text-shadow:0 0 6px var(--neon),0 0 12px var(--neon);
+                    background:var(--neon); box-shadow:0 0 12px var(--neon),
+                    inset 0 0 8px rgba(0,255,255,.6); transition:width .6s ease-out; }
+  </style>
+</head>
+<body>
+  <h1>How People Ranked This Headline</h1>
+
+  <div class="card">
+
+    <div class="results-row">
+      <span class="results-label">Strongly Anti</span>
+      <div class="results-bar">
+        <div class="results-fill" style="width:{{percentages.strongly_anti}}%;">
+          {{percentages.strongly_anti}}% ({{counts.strongly_anti}})
+        </div>
+      </div>
+    </div>
+
+    <div class="results-row">
+      <span class="results-label">Moderately Anti</span>
+      <div class="results-bar">
+        <div class="results-fill" style="width:{{percentages.moderately_anti}}%;">
+          {{percentages.moderately_anti}}% ({{counts.moderately_anti}})
+        </div>
+      </div>
+    </div>
+
+    <div class="results-row">
+      <span class="results-label">Neutral</span>
+      <div class="results-bar">
+        <div class="results-fill" style="width:{{percentages.neutral}}%;">
+          {{percentages.neutral}}% ({{counts.neutral}})
+        </div>
+      </div>
+    </div>
+
+    <div class="results-row">
+      <span class="results-label">Moderately Pro</span>
+      <div class="results-bar">
+        <div class="results-fill" style="width:{{percentages.moderately_pro}}%;">
+          {{percentages.moderately_pro}}% ({{counts.moderately_pro}})
+        </div>
+      </div>
+    </div>
+
+    <div class="results-row">
+      <span class="results-label">Strongly Pro</span>
+      <div class="results-bar">
+        <div class="results-fill" style="width:{{percentages.strongly_pro}}%;">
+          {{percentages.strongly_pro}}% ({{counts.strongly_pro}})
+        </div>
+      </div>
+    </div>
+
+    <p style="margin-top:16px;color:var(--muted);font-size:0.9rem;">
+      Total responses: {{total}}
+    </p>
+  </div>
+
+  <div style="text-align:center; margin-top:24px;">
+    <a href="/topics" style="color:var(--neon); text-decoration:none;">← Back to Topics</a>
+  </div>
+</body>
+</html>

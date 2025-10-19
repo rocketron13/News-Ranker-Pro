@@ -1,0 +1,28 @@
+{
+	"name": "cs-545-final-project",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"type": "module",
+	"scripts": {
+		"seed": "node ./tasks/seed.js",
+		"test": "node ./tasks/tester.js",
+		"start": "node app.js"
+	},
+	"author": "Group 12",
+	"license": "MIT",
+	"dependencies": {
+		"@sendgrid/mail": "^8.1.4",
+		"@supabase/supabase-js": "^2.75.0",
+		"bcrypt": "^5.1.1",
+		"bcryptjs": "^2.4.3",
+		"cookie-parser": "^1.4.7",
+		"dotenv": "^16.6.1",
+		"express": "^4.21.2",
+		"express-handlebars": "^8.0.1",
+		"express-session": "^1.18.1",
+		"mongodb": "^6.15.0",
+		"nodemailer": "^6.10.1",
+		"xss": "^1.0.15"
+	}
+}
