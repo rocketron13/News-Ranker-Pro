@@ -1,0 +1,16 @@
+{{> topBanner}}
+
+<section id="headlinePage">
+  <h2>Topic: {{topic}}</h2>
+  <p id="headlineText">{{headline.text}}</p>
+  <p><em>{{headline.publication}} — {{headline.pub_date}}</em></p>
+
+  <form method="post" action="/ratings">
+    <input type="hidden" name="headlineId" value="{{headline.id}}">
+    <button type="submit" name="stance" value="strongly_anti">Strongly Anti</button>
+    <button type="submit" name="stance" value="moderately_anti">Moderately Anti</button>
+    <button type="submit" name="stance" value="neutral">Neutral</button>
+    <button type="submit" name="stance" value="moderately_pro">Moderately Pro</button>
+    <button type="submit" name="stance" value="strongly_pro">Strongly Pro</button>
+  </form>
+</section>

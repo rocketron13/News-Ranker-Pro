@@ -1,0 +1,49 @@
+<section id="topicPage">
+  <h2 id="topicTitle">Topic: {{topic}}</h2>
+  <p id="question"></p>
+  <blockquote id="headline"></blockquote>
+  <p id="headlineMeta"></p>
+
+  <p id="question">Does this headline frame {{topic}} as good (PRO), bad (ANTI), or neither (NEUTRAL)?</p>
+  <p id="headlineMeta" style="display:none; margin-top:8px; font-size:0.9rem; color:var(--muted);"></p>
+
+
+  <blockquote id="headline" data-id="{{headlineId}}">{{headlineText}}</blockquote>
+
+  <form id="ratingForm" method="POST" action="/ratings">
+    <input type="hidden" name="headlineId" id="headlineIdInput" value="">
+    <input type="hidden" name="stance" id="stanceInput" value="">
+    <input type="hidden" name="topic" value="{{topic}}">
+
+    <div id="classificationButtons">
+      <button type="submit" data-score="-2">Strongly Anti</button>
+      <button type="submit" data-score="-1">Moderately Anti</button>
+      <button type="submit" data-score="0">Neutral</button>
+      <button type="submit" data-score="1">Moderately Pro</button>
+      <button type="submit" data-score="2">Strongly Pro</button>
+    </div>
+  </form>
+  <div id="rateStatus"></div>
+
+  <div id="results" class="card" style="display:none;">
+    <h3>This is How Other People Ranked this</h3>
+    <div id="resultsList"></div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <button onclick="goHome()">Main Menu</button>
+    <button onclick="nextHeadline()">Next Headline</button>
+  </div>
+
+  <div id="noMoreBox" class="notice-neon" style="display:none;">
+    <div id="noMoreMsg">No new headlines left for this topic.</div>
+    <p>Select a News Topic to Rank:</p>
+    <div class="topic-choices">
+      <button onclick="selectTopic('Illegal Immigration')">Illegal Immigration</button>
+      <button onclick="selectTopic('Police')">Police</button>
+      <button onclick="selectTopic('Universal Healthcare')">Universal Healthcare</button>
+    </div>
+  </div>
+
+
+</section>

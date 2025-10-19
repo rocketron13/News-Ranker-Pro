@@ -1,0 +1,14 @@
+{{> topBanner}}
+
+<section id="usernameGate" class="card">
+  <h2>Enter a Username to Start</h2>
+
+  <form id="usernameForm" action="users/login" method="POST" style="display:flex; gap:8px; align-items:center;">
+    <input id="usernameInput" name="username" type="text" placeholder="Choose a unique username" style="flex:1;">
+    <button id="usernameBtn" type="submit">Continue</button>
+  </form>
+
+  <div id="usernameMsg" style="margin-top:8px; color:var(--muted);"></div>
+</section>
+
+<script src="/public/js/user.js"></script>
