@@ -1,0 +1,26 @@
+{{> topBanner}}
+
+<section class="card" id="signInSection">
+  <h2>Login</h2>
+
+<form class="authenticationForm" id="loginForm" action="users/login" method="POST">
+
+  <div class="inputGroup">
+    <label for="usernameInput">Username:</label>
+    <input id="usernameInput" name="username" type="text" placeholder="Enter username...">
+  </div>
+
+  <div class="inputGroup">
+    <label for="passwordInput">Password:</label>
+    <input id="passwordInput" name="password" type="password" placeholder="Enter password...">
+  </div>
+
+  <button id="loginButton" type="submit">Login</button>
+  <a href="/signup" class="btn">Don't have an account? Sign up</a>
+</form>
+
+
+  <div id="usernameMsg"></div>
+</section>
+
+<script src="/public/js/user.js"></script>
