@@ -36,6 +36,42 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(path.resolve('public')));
 
+/* General Middleware */
+app.use((req, res, next) => {
+  let date = new Date().toUTCString();
+  let isLoggedIn;
+  if (req.session.user) isLoggedIn = true;
+  else isLoggedIn = false;
+
+  if (isLoggedIn) {
+      // User
+      if (req.session.user.isAdmin)
+        console.log(`[${date}]: ${req.method} ${req.path} (Authenticated Admin)`);   
+      else
+        console.log(`[${date}]: ${req.method} ${req.path} (Authenticated User)`);
+      } else console.log(`[${date}]: ${req.method} ${req.path} (Non-Authenticated)`);
+
+  next();
+});
+
+/* GET /login */
+app.use('/login', (req, res, next) => {
+  if (!req.session.user) next();
+  else return res.redirect('main');
+})
+
+/* GET /signup */
+app.use('/signup', (req, res, next) => {
+  if (!req.session.user) next();
+  else return res.redirect('main');
+})
+
+/* GET /main */
+app.use('/main', (req, res, next) => {
+  if (req.session.user) next();
+  else return res.redirect('login');
+})
+
 // Routes
 routes(app);
 
