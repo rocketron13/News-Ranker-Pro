@@ -1,7 +1,6 @@
 import { static as staticDir } from 'express';
 import path from 'path';
-import homeRoutes from './home.js';
-import usersRoutes from './users.js';
+import userRoutes from './users.js';
 import mainRoutes from './main.js';
 import topicsRoutes from './topics.js';
 import headlinesRoutes from './headlines.js';
@@ -13,8 +12,7 @@ const constructorMethod = (app) => {
   app.use('/public', staticDir(path.resolve('public')));
 
   // API routes
-  app.use('/', homeRoutes);
-  app.use('/users', usersRoutes);
+  app.use('/', userRoutes);
   app.use('/main', mainRoutes);
   app.use('/topics', topicsRoutes);
   app.use('/headlines', headlinesRoutes);
@@ -22,7 +20,7 @@ const constructorMethod = (app) => {
   app.use('/results', resultsRoutes);
 
   // Catch-all route
-  app.use('*', (req, res) => res.redirect('/'));
+  app.use('*', (req, res) => res.redirect('/login'));
 };
 
 export default constructorMethod;
