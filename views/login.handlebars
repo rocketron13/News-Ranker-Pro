@@ -3,11 +3,11 @@
 <section class="card" id="signInSection">
   <h2>Login</h2>
 
-<form class="authenticationForm" id="loginForm" action="users/login" method="POST">
+<form class="authenticationForm" id="loginForm" action="/login" method="POST">
 
   <div class="inputGroup">
-    <label for="usernameInput">Username:</label>
-    <input id="usernameInput" name="username" type="text" placeholder="Enter username...">
+    <label for="emailInput">Email:</label>
+    <input id="emailInput" name="email" type="text" value="{{user.email}}" placeholder="Enter email...">
   </div>
 
   <div class="inputGroup">
@@ -19,6 +19,16 @@
   <a href="/signup" class="btn">Don't have an account? Sign up</a>
 </form>
 
+
+<ul id='login-errors' class="error-list">
+{{#if hasErrors}}
+    {{#each errors}}
+    <li>
+        {{this}}
+    </li>
+    {{/each}}
+{{/if}}
+</ul>
 
   <div id="usernameMsg"></div>
 </section>
