@@ -26,10 +26,15 @@ h1 {
 }
 
 .card { 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   background:var(--card);
   border:2px solid var(--neon); border-radius:14px;
   padding:16px;
   margin:18px 0;
+  height: 50vh;
   box-shadow:0 0 16px rgba(0,255,255,.35);
   gap: 1.5em;
 }
@@ -200,4 +205,45 @@ blockquote {
   align-items: center;
   justify-content: center;
   min-height: 50vh;
+}
+
+/* MAIN MENU FORMATTING */
+#mainMenu h1 {
+  font-size: 2.5rem;
+}
+
+#mainMenu p {
+  font-size: 1.5rem;
+}
+
+#mainMenu form {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mainMenuGroup {
+  display: inline-block;
+}
+
+
+/* HEADLINE FORMATTING */
+#headlinePage h2 {
+  font-size: 1.5rem;
+}
+
+#headlineText p {
+  font-size: 0.75rem;
+}
+
+#mainMenu form {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.headlineGroup {
+  display: inline-block;
 }

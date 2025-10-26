@@ -1,16 +1,35 @@
 {{> topBanner}}
 
-<section id="headlinePage">
+<section class="card" id="headlinePage">
   <h2>Topic: {{topic}}</h2>
-  <p id="headlineText">{{headline.text}}</p>
+  <p id="headlineText">Headline: "{{headline.text}}"</p>
   <p><em>{{headline.publication}} — {{headline.pub_date}}</em></p>
 
-  <form method="post" action="/ratings">
-    <input type="hidden" name="headlineId" value="{{headline.id}}">
-    <button type="submit" name="stance" value="strongly_anti">Strongly Anti</button>
-    <button type="submit" name="stance" value="moderately_anti">Moderately Anti</button>
-    <button type="submit" name="stance" value="neutral">Neutral</button>
-    <button type="submit" name="stance" value="moderately_pro">Moderately Pro</button>
-    <button type="submit" name="stance" value="strongly_pro">Strongly Pro</button>
+  <form method="POST" action="/ratings">
+
+    <div class="headlineGroup">
+      <input type="hidden" name="headlineId" value="{{headline.id}}">
+    </div>
+
+    <div class="headlineGroup">
+      <button type="submit" name="stance" value="strongly_anti">Strongly Anti</button>
+    </div>
+
+    <div class="headlineGroup">
+      <button type="submit" name="stance" value="moderately_anti">Moderately Anti</button>
+    </div>
+
+    <div class="headlineGroup">
+      <button type="submit" name="stance" value="neutral">Neutral</button>
+    </div>
+
+    <div class="headlineGroup">
+      <button type="submit" name="stance" value="moderately_pro">Moderately Pro</button>
+    </div>
+
+    <div class="headlineGroup">
+      <button type="submit" name="stance" value="strongly_pro">Strongly Pro</button>
+    </div>
+
   </form>
 </section>
