@@ -76,7 +76,7 @@ router
       return res.status(500).render('error', {
         error: e.message || String(e),
         status: 500
-      })
+      });
     }
   })
   .post(async (req, res) => {

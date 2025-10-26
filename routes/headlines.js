@@ -1,22 +1,26 @@
 import express from 'express';
-import { getRandomHeadline } from '../data/headlines.js';
-import { getTopicByTitle } from '../data/topics.js';
+import headlineData from '../data/headlines.js';
+import helpers from '../data/helpers.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  console.log("In headline.js route")
-  if (!req.session.user) return res.redirect('/');
-  const topicTitle = req.query.topic;
-  try {
-    const topic = await getTopicByTitle(topicTitle);
-    const headline = await getRandomHeadline(topic.id, req.session.user.id);
-    if (!headline) return res.render('noMoreHeadlines', { username: req.session.user.username, topic: topicTitle });
-    return res.render('headline', { username: req.session.user.username, topic: topicTitle, headline });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Something went wrong.');
-  }
+router
+  .route('/')
+  .get(async (req, res) => {
+    console.log("INSIDE HEADLINES")
+    const topicTitle = helpers.checkString(req.query.topic);
+    try {
+      const headline = await headlineData.getUnratedHeadline(req.session.user.id, topicTitle);
+      if (!headline) return res.render('error', { username: req.session.user.username, topic: topicTitle });
+      return res.render('headline', { username: req.session.user.username, topic: topicTitle, headline });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).render('error', {
+        error: e.message || String(e),
+        status: 500
+      });
+    }
 });
+
 
 export default router;
