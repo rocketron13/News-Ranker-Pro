@@ -1,3 +1,15 @@
+{{> topBanner}}
 
-<h2 id = "errorStatus">{{status}}</h2>
-<p id = "errorMessage">{{error}}</p>
+<section class="card" id="mainMenu">
+    <h2>Uh oh! An Error Occurred</h2>
+    <p id = "errorMessage">{{error}} - Error Code {{status}}</p>
+
+    <form method="GET" action="/main">
+
+        <div class="mainMenuGroup">
+            <button type="submit">Main Menu</button>
+        </div>
+
+    </form>
+
+</section>

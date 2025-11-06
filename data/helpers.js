@@ -109,6 +109,13 @@ const sendVerificationEmail = async (id) => {
     }
 }
 
+function checkStance(stance) {
+    if (stance === undefined) throw new Error('stance value cannot be empty.');
+    if (typeof stance !== 'string') throw new Error('stance value must be a number.');
+    if (stance < -2 || stance > 2) throw new Error('stance must be between [-2, 2].');
+    return stance;
+}
+
 
 export default {
     checkId,
@@ -117,5 +124,6 @@ export default {
     checkEmail,
     checkPassword,
     checkName,
-    sendVerificationEmail
+    sendVerificationEmail,
+    checkStance
 }
