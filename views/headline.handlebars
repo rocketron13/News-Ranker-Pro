@@ -1,35 +1,93 @@
 {{> topBanner}}
 
-<section class="card" id="headlinePage">
-  <h2>Topic: {{topic}}</h2>
-  <p id="headlineText">Headline: "{{headline.text}}"</p>
-  <p><em>{{headline.publication}} — {{headline.pub_date}}</em></p>
+<section class="card" id="topicPage">
+  <h2 id="topicTitle">Topic: {{topic}}</h2>
+  <p id="question">Does this headline frame {{topic}} as good (PRO), bad (ANTI), or neither (NEUTRAL)?</p>
+  <blockquote id="headline" data-id="{{headlineId}}">{{headline.text}}</blockquote>
 
-  <form method="POST" action="/ratings">
+  {{#unless summary}}
+  <form id="ratingForm" method="POST" action="/headlines/ratings">
+    <input type="hidden" name="headlineId" id="headlineIdInput" value="{{headline.id}}">
+    <input type="hidden" name="topic" value="{{topic}}">
 
-    <div class="headlineGroup">
-      <input type="hidden" name="headlineId" value="{{headline.id}}">
+    <div id="classificationButtons">
+      <button type="submit" class="strong-anti" name="stance" value="-2">Strongly Anti</button>
+      <button type="submit" class="moderate-anti" name="stance" value="-1">Moderately Anti</button>
+      <button type="submit" class="neutral" name="stance" value="0">Neutral</button>
+      <button type="submit" class="moderate-pro" name="stance" value="1">Moderately Pro</button>
+      <button type="submit" class="strong-pro" name="stance" value="2">Strongly Pro</button>
     </div>
-
-    <div class="headlineGroup">
-      <button type="submit" name="stance" value="strongly_anti">Strongly Anti</button>
-    </div>
-
-    <div class="headlineGroup">
-      <button type="submit" name="stance" value="moderately_anti">Moderately Anti</button>
-    </div>
-
-    <div class="headlineGroup">
-      <button type="submit" name="stance" value="neutral">Neutral</button>
-    </div>
-
-    <div class="headlineGroup">
-      <button type="submit" name="stance" value="moderately_pro">Moderately Pro</button>
-    </div>
-
-    <div class="headlineGroup">
-      <button type="submit" name="stance" value="strongly_pro">Strongly Pro</button>
-    </div>
-
   </form>
+  {{/unless}}
+
+  {{#if summary}}
+  <div id="results" class="card" style="display:none; margin-top:16px;">
+    <h3>This is How Other People Ranked this</h3>
+    <div id="resultsList"></div>
+  </div>
+  {{/if}}
+
+
+  <div id="headline-main-next">
+    <form action="/main" method="GET">
+      <button type="submit">Main Menu</button>
+    </form>
+    <form action="/headlines" method="GET">
+      <input type="hidden" name="topic" value="{{topic}}">
+      <button type="submit">Next Headline</button>
+    </form>
+  </div>
+
 </section>
+
+
+
+<script>
+  // Optional headline word effect
+  const headlineEl = document.getElementById('headline');
+  const text = headlineEl.textContent.trim();
+  headlineEl.innerHTML = '';
+  headlineEl.innerHTML += `<span class="word">"</span> `;
+  text.split(' ').forEach((word, i) => {
+    headlineEl.innerHTML += `<span class="word">${word}</span>`;
+    if (i < text.split(' ').length - 1) headlineEl.innerHTML += '&nbsp;';
+  });
+  headlineEl.innerHTML += `<span class="word">.</span><span class="word">"</span>`;
+
+  function renderResults(summary) {
+    const order = [
+      ['strongly_anti','Strongly Anti'],
+      ['moderately_anti','Moderately Anti'],
+      ['neutral','Neutral'],
+      ['moderately_pro','Moderately Pro'],
+      ['strongly_pro','Strongly Pro']
+    ];
+
+    const list = document.getElementById('resultsList');
+    const html = order.map(([key, label]) => {
+      const count = summary[key] || 0;
+      const total = Object.values(summary).reduce((a,b)=>a+b,0) || 1;
+      const pct = Math.round((count*100)/total);
+      return `
+        <div class="results-row">
+          <span class="results-label">${label}</span>
+          <div class="results-bar">
+            <div class="results-fill" style="width:${pct}%;">${pct}% (${count})</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    list.innerHTML = html;
+    document.getElementById('results').style.display = 'block';
+  }
+
+  {{#if summary}}
+    renderResults({
+      strongly_anti: {{summary.strongly_anti}},
+      moderately_anti: {{summary.moderately_anti}},
+      neutral: {{summary.neutral}},
+      moderately_pro: {{summary.moderately_pro}},
+      strongly_pro: {{summary.strongly_pro}}
+    });
+  {{/if}}
+</script>
