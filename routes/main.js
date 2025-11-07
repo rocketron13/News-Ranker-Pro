@@ -4,11 +4,18 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const username = req.session.user.username || "Guest";
-    return res.render('mainMenu', {username})
+    return res.render('mainMenu', {
+      username,
+      score: req?.session?.user?.score,
+      rank: req?.session?.user?.rank,
+      total: req?.session?.user?.total
+    })
   } catch (e) {
     return res.status(500).render('error', {
       error: e.message || String(e),
-      status: 500
+      status: 500,
+      score: req?.session?.score,
+      rank: req?.session?.rank
     });
   }
 });

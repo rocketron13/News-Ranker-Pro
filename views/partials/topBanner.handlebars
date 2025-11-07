@@ -1,7 +1,22 @@
 <div id="topBanner" class="top-banner">
-  <span id="activeUser">
-    Signed in as {{username}}
-  </span>
+  <div class="banner-user">
+    
+    {{#if username}}
+    <span id="activeUser">Signed in as {{username}}</span>
+    {{/if}}
+
+    {{#unless username}}
+    <span id="activeUser" style="text-align: center">Welcome to the News Headline Ranking Game!</span>
+    {{/unless}}
+
+    {{#if rank}}
+    <div class="user-stats">
+      <span id="userRank">Rank: {{rank}} / {{total}}</span>
+      <span id="userScore">Score: {{score}}</span>
+    </div>
+    {{/if}}
+  </div>
+
   <div class="banner-actions">
     <form action="/logout" method="get" style="display:inline;">
       <button type="submit" class="banner-btn">Change User</button>

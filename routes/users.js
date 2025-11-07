@@ -32,7 +32,9 @@ router
         return res.status(400).render('login', {
           user: user,
           errors: errors,
-          hasErrors: true
+          hasErrors: true,
+          score: req?.session?.score,
+          rank: req?.session?.rank
         });
       }
 
@@ -44,18 +46,25 @@ router
         return res.status(400).render('login', {
           user: user,
           errors: ["Invalid login credentials."],
-          hasErrors: true
+          hasErrors: true,
+          score: req?.session?.score,
+          rank: req?.session?.rank
         });
       }
 
       // Fetch username from 'players' table
-      const player = await userData.getUsernameById(session.user.id);
+      const player = await userData.getUserById(session.user.id);
+      // Fetch 'rank' and 'total players'
+      const {rank, total} = await userData.getUserRank(session.user.id);
 
       // Save user in session
       req.session.user = {
         id: session.user.id,
         email: session.user.email,
         username: player.username,
+        score: player.score,
+        rank,
+        total,
         accessToken: session.access_token, /* Used to authenticate a user's requests */
         refreshToken: session.refresh_token /* Used to get a new access_token when it expires */
       }
@@ -75,7 +84,9 @@ router
     } catch (e) {
       return res.status(500).render('error', {
         error: e.message || String(e),
-        status: 500
+        status: 500,
+        score: req?.session?.score,
+        rank: req?.session?.rank
       });
     }
   })
@@ -122,12 +133,13 @@ router
     }
     if (user.password != user.confirmPassword) errors.push("Password and confirm password must match.");
     // If errors with the input, cancel the submission
-    console.log(user)
     if (errors.length > 0) {
       return res.status(400).render('signup', {
         user: user,
         errors: errors,
-        hasErrors: true
+        hasErrors: true,
+        score: req?.session?.score,
+        rank: req?.session?.rank
       });
     }
 
@@ -139,7 +151,9 @@ router
       return res.status(500).render('signup', {
         user: user,
         errors: errors,
-        hasErrors: true
+        hasErrors: true,
+        score: req?.session?.score,
+        rank: req?.session?.rank
       });
     }
 });
