@@ -23,6 +23,8 @@ async function registerUser(email, password, username, firstName, lastName) {
   return {user, player};
 }
 
+
+
 async function signUp(email, password) {
   // Validate input
   email = helpers.checkEmail(email);
@@ -40,6 +42,8 @@ async function signUp(email, password) {
   }
 }
 
+
+
 async function login(email, password) {
   // Validate input
   email = helpers.checkEmail(email);
@@ -56,6 +60,8 @@ async function login(email, password) {
     return data.session;
   }
 }
+
+
 
 async function createPlayerForUser(userId, username, email, firstName, lastName) {
   // Validate input
@@ -83,11 +89,11 @@ async function createPlayerForUser(userId, username, email, firstName, lastName)
 }
 
 
-async function getUsernameById(id) {
+async function getUserById(id) {
   id = helpers.checkId(id);
   const { data: player, error: playerError } = await sb
     .from('players')
-    .select('username')
+    .select('*')
     .eq('id', id)
     .single();
 
@@ -99,8 +105,46 @@ async function getUsernameById(id) {
 
 
 
+async function getUserRank(userId) {
+  userId = helpers.checkId(userId);
+
+  // 1) Fetch the user's score
+  const {data: userData, error: userError} = await sb
+    .from('players')
+    .select('score')
+    .eq('id', userId)
+    .single();
+
+  if (userError) throw new Error('Error fetching user score: ' + userError);
+  const userScore = userData?.score;
+  if (userScore === undefined || userScore === null) throw new Error('User does not have a score.');
+
+  // 2) Count how many players have a higher score
+  const {count: higherCount, error: countError} = await sb
+    .from('players')
+    .select('id', {count: 'exact', head: true})
+    .gt('score', userScore);
+
+  if (countError) throw new Error('Error counting higher scores: ' + countError);
+
+  // 3) Count total players
+  const {count: totalCount, error: totalError} = await sb
+    .from('players')
+    .select('id', {count: 'exact', head: true});
+
+  if (totalError) throw new Error('Error counting total players: ' + totalError);
+
+  // 4) Calculate rank (higherCount + 1)
+  const rank = higherCount + 1;
+
+  return {rank, total: totalCount};
+}
+
+
+
 export default {
   registerUser,
   login,
-  getUsernameById
+  getUserById,
+  getUserRank
 }

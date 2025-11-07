@@ -1,6 +1,7 @@
 import express from 'express';
 import { submitRating, getRatingsForHeadline, STANCE_ENUM } from '../data/ratings.js';
 
+/*
 const router = express.Router();
 
 router.post('/', async (req, res) => {
@@ -56,3 +57,4 @@ router.post('/', async (req, res) => {
 });
 
 export default router;
+*/

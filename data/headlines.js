@@ -91,19 +91,19 @@ async function rateHeadline(playerId, headlineId, ratingValue) {
   // Fetch current totals
   const { data: player, error: fetchError } = await sb
     .from('players')
-    .select('total_ratings, sum_soft_score')
+    .select('total_ratings, score')
     .eq('id', playerId)
     .single();
   if (fetchError) throw fetchError;
 
-  const { total_ratings = 0, sum_soft_score = 0 } = player;
+  const { total_ratings = 0, score = 0 } = player;
 
   // Update totals
   const { data: playerData, error: playerError } = await sb
     .from('players')
     .update({
       total_ratings: total_ratings + 1,
-      sum_soft_score: sum_soft_score + ratingValue
+      score: score + ratingValue
     })
     .eq('id', playerId)
     .select()
@@ -116,63 +116,97 @@ async function rateHeadline(playerId, headlineId, ratingValue) {
 
 
 
-async function calculateScore(userVote, summary) {
-  // Map numeric votes to stance labels
+async function updateScore(userId, scoreChange) {
+  userId = helpers.checkId(userId);
+
+  const { data: player, error: fetchError } = await sb
+    .from('players')
+    .select('score')
+    .eq('id', userId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const newScore = (player?.score || 0) + scoreChange;
+
+  const { error: updateError } = await sb
+    .from('players')
+    .update({ score: newScore })
+    .eq('id', userId);
+
+  if (updateError) throw updateError;
+
+  return newScore;
+}
+
+
+
+
+async function calculateScore(userId, userVote, summary) {
   const stanceMap = {
     '-2': 'strongly_anti',
     '-1': 'moderately_anti',
     '0': 'neutral',
     '1': 'moderately_pro',
     '2': 'strongly_pro'
-  }
+  };
   const userStance = stanceMap[userVote.toString()];
 
-  // Compute total votes including current vote
   const totalVotes = Object.values(summary).reduce((a, b) => a + b, 0) + 1;
 
-  // Early Trendsetter: less than 7 votes
-  if (totalVotes < 7) return {message: "Early Trendsetter", score: 2};
+  // Early Trendsetter
+  if (totalVotes < 7) {
+    const score = 2;
+    await updateScore(userId, score);
+    return { message: "Early Trendsetter", score };
+  }
 
-  // Computer directional sums
   const proVotes = summary.strongly_pro + summary.moderately_pro;
   const antiVotes = summary.strongly_anti + summary.moderately_anti;
 
-  // Get leading stance
   const maxCount = Math.max(...Object.values(summary));
   const topStances = Object.keys(summary).filter(s => summary[s] === maxCount);
 
-  // Check if user flipped a category
-  let message;
+  // Check if user flipped the category
+  let message = "";
   let flippedPoints = 0;
   if (!topStances.includes('neutral') && summary[userStance] + 1 > maxCount) {
-    message = "Very Impactful Vote";
-    flippedPoints = 50; // Very impactful vote bonus
+    message = "Ultra Impactful Vote Bonus!";
+    flippedPoints = 50;
   } else if (userStance === 'neutral' && summary[userStance] + 1 > maxCount) {
-    message = "Numbing the Crowd";
-    flippedPoints = 30; // Numbing the crowd!
+    message = "Numbing the Crowd to Overlook Nuance";
+    flippedPoints = -30;
   }
 
-  // Exact match: 20 pts
-  if (topStances.includes(userStance)) return 20 + flippedPoints;
-
-  // Neutral vote handling
-  if (userVote === 0) {
+  let score;
+  if (topStances.includes(userStance)) {
+    score = 20 + flippedPoints;
+    message ||= "Great Minds Think Alike";
+  } else if (userVote === 0) {
     if (proVotes > antiVotes || antiVotes > proVotes) {
-      message: "Neutral Numbskull"
-      return {message, score: -10}; // Neutral in non-neutral leading
+      score = -10;
+      message = "Neutral Where There Is Nuance?";
+    } else {
+      score = 2;
+      message = "Neutral Minds Match";
     }
-    message: "Neutral Minds Match";
-    return {message, score: 2};
+  } else if (
+    (userVote > 0 && proVotes >= antiVotes) ||
+    (userVote < 0 && antiVotes > proVotes)
+  ) {
+    score = 10 + flippedPoints;
+    message ||= "Directionally in Line with the Crowd";
+  } else {
+    score = -10 + flippedPoints;
+    message ||= "Swimming with Salmon";
   }
 
-  // Directional matching: 10 pts
-  const directionMatch = (userVote > 0 && proVotes >= antiVotes) || (userVotes < 0 && antiVotes > proVotes);
+  // Update the user's score in DB
+  await updateScore(userId, score);
 
-  if (directionMatch) return {message: "Directional Matching", score: flippedPoints};
-
-  // Directional opposite: -10 pts
-  return {message: "Directional Opposite", score: -10};
+  return { message, score };
 }
+
+
 
 
 
@@ -234,6 +268,7 @@ async function getHeadlineRatingsSummary(headlineId) {
 export default {
   getUnratedHeadline,
   rateHeadline,
+  calculateScore,
   getHeadlineById,
   getHeadlineRatingsSummary
 }

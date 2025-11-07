@@ -2,6 +2,7 @@
 import express from 'express';
 import { sb } from '../config/supabaseClient.js';
 
+/*
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -53,3 +54,4 @@ router.get('/', async (req, res) => {
 });
 
 export default router;
+*/

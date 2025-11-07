@@ -1,9 +1,19 @@
 {{> topBanner}}
 
-<section class="card" id="topicPage">
+<section id="topicPage">
   <h2 id="topicTitle">Topic: {{topic}}</h2>
+  
+  {{#unless summary}}
   <p id="question">Does this headline frame {{topic}} as good (PRO), bad (ANTI), or neither (NEUTRAL)?</p>
+  {{/unless}}
+
+  {{#if summary}}
+  <h2>Points earned: <span class="masked-text">{{scoreEarned}}</span></h2>
+  <h2 class="masked-text">{{message}}</h2>
+  {{/if}}
+
   <blockquote id="headline" data-id="{{headlineId}}">{{headline.text}}</blockquote>
+
 
   {{#unless summary}}
   <form id="ratingForm" method="POST" action="/headlines/ratings">
@@ -21,7 +31,9 @@
   {{/unless}}
 
   {{#if summary}}
-  <div id="results" class="card" style="display:none; margin-top:16px;">
+  <h2>News Source - <span class="masked-text">{{headline.publication}}</span></h2>
+  <h2>Publication Date - <span class="masked-text">{{headline.pub_date}}</span></h2>
+  <div id="results" style="display:none; margin-top:16px;">
     <h3>This is How Other People Ranked this</h3>
     <div id="resultsList"></div>
   </div>
@@ -52,7 +64,7 @@
     headlineEl.innerHTML += `<span class="word">${word}</span>`;
     if (i < text.split(' ').length - 1) headlineEl.innerHTML += '&nbsp;';
   });
-  headlineEl.innerHTML += `<span class="word">.</span><span class="word">"</span>`;
+  headlineEl.innerHTML += `<span class="word"></span><span class="word">"</span>`;
 
   function renderResults(summary) {
     const order = [
