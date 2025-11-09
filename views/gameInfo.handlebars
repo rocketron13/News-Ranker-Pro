@@ -1,0 +1,79 @@
+{{!-- views/gameInfo.handlebars --}}
+{{> topBanner}}
+
+<section class="card" id="gameInfoSection" aria-labelledby="gameInfoTitle">
+  <h2 id="gameInfoTitle">Game Info</h2>
+
+  <h3>Welcome to the News Ranker!</h3>
+
+  <h3>Quick Guide</h3>
+  <ol>
+    <li><strong>Pick a Topic</strong><br>
+        Choose what kind of headlines you want to see.</li><br>
+    <li><strong>Rank the Headline</strong><br>
+        Select from 5 categories:
+        <ul>
+          <li>Strongly Pro</li>
+          <li>Moderately Pro</li>
+          <li>Neutral</li>
+          <li>Moderately Anti</li>
+          <li>Strongly Anti</li><br>
+        </ul>
+    </li>
+    <li><strong>See Results Instantly</strong><br>
+        Right after you vote, you will see how others ranked the same headline.</li>
+  </ol>
+
+  <div class="notice-neon" role="note" style="max-width: 90%;">
+    When ranking, focus on the <em>headline itself</em> - not your personal opinion about the topic.<br>
+    Ask yourself: "Does this headline sound strongly pro-topic, strongly anti-topic, or more neutral in tone?"<br>
+    Your task is to classify how the headline is <em>framing</em> the topic, not whether you personally agree or disagree.
+  </div>
+
+  <h3>Scoring Rules for News Ranker</h3>
+  <ul>
+    <li><strong>Match the Crowd Exactly:</strong> If your ranking matches the top ranking (the category with the most votes), you get <strong>+20</strong> points (Great Minds Think Alike).</li>
+
+    <li><strong>Directionally in Line:</strong> If you do not match exactly, but your choice is in the same direction as the top ranking (for example, you chose Moderately Pro while most chose Strongly Pro), you get <strong>+10</strong> points (Directionally in Line with the Crowd).</li>
+
+    <li><strong>Directionally Opposite:</strong> If your choice is in the opposite direction of the top ranking (counting both options in that direction), you get <strong>-10</strong> points (Swimming with Salmon).</li>
+
+    <li><strong>Neutral Matches Neutral:</strong> If you chose Neutral and Neutral is the top ranking, you get <strong>+2</strong> points.</li>
+
+    <li><strong>Neutral vs Non-Neutral Crowd:</strong> If you chose Neutral but the leading votes (combining both options in a direction) are not Neutral, you get <strong>-10</strong> points (Neutral where there is Nuance?).</li>
+
+    <li><strong>Ultra Impactful Vote Bonus:</strong> If your vote flips the top category to your chosen category (any category other than Neutral), you get <strong>+50</strong> points.</li>
+
+    <li><strong>Neutral Flip Penalty:</strong> If your vote flips the top category to Neutral, you get <strong>-30</strong> points (Numbing the Crowd to Overlook Nuance?).</li>
+
+    <li><strong>Early Trendsetter:</strong> If a headline has fewer than 7 total votes, none of the above apply - your vote gets you <strong>+2</strong> points.</li>
+  </ul>
+
+  <h4>Example (Directionality)</h4>
+  <p>If voting for a headline looks like this:</p>
+
+  <table style="width:90%; max-width:700px; border-collapse:collapse; margin:0.5rem auto; border:1px solid var(--neon); box-shadow:0 0 12px rgba(0,255,255,.25);">
+    <thead>
+      <tr style="background:rgba(0,255,255,.08);">
+        <th style="padding:8px; border-bottom:1px solid var(--neon); text-align:left;">Classification</th>
+        <th style="padding:8px; border-bottom:1px solid var(--neon); text-align:right;">% of Votes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:8px;">Strongly Pro</td><td style="padding:8px; text-align:right;">25%</td></tr>
+      <tr><td style="padding:8px;">Moderately Pro</td><td style="padding:8px; text-align:right;">30%</td></tr>
+      <tr><td style="padding:8px;">Neutral</td><td style="padding:8px; text-align:right;">10%</td></tr>
+      <tr><td style="padding:8px;">Moderately Anti</td><td style="padding:8px; text-align:right;">10%</td></tr>
+      <tr><td style="padding:8px;">Strongly Anti</td><td style="padding:8px; text-align:right;">25%</td></tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" style="padding:8px; border-top:1px solid var(--neon); color:var(--muted);">
+          Directional majority is Pro (25% + 30% = 55%). Choosing Moderately Anti or Strongly Anti is directionally opposite -> -10 points.
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  {{!-- No "Back to Game" button here; the banner provides Main Menu / Game Info controls --}}
+</section>
