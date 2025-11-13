@@ -21,6 +21,16 @@
     <form action="/logout" method="get" style="display:inline;">
       <button type="submit" class="banner-btn">Change User</button>
     </form>
-    <button id="gameInfoBtn" class="banner-btn">Game Info</button>
+    <!-- Game Info uses same GET form pattern as other buttons with a swithc condition to show Main Menu button vs Game Info button -->
+    {{#if isInfoPage}}
+    <form action="/main" method="get" style="display:inline;">
+      <button type="submit" id="mainMenuBtn" class="banner-btn">Main Menu</button>
+    </form>
+    {{else}}
+    <form id="infoForm" action="/info" method="get" style="display:none;"></form>
+    <button type="submit" form="infoForm" id="gameInfoBtn" class="banner-btn">
+      Game Info
+    </button>
+    {{/if}}
   </div>
 </div>

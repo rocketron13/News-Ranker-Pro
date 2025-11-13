@@ -582,5 +582,31 @@ blockquote {
 }
 
 
+/* === Global Neon Scrollbar (Chrome/Edge/Safari) === */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
 
+*::-webkit-scrollbar-track {
+  background: #0a0a0a;
+  border-radius: 8px;
+}
 
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon), #00aaff);
+  border-radius: 8px;
+  box-shadow: 0 0 10px var(--neon);
+  transition: all .25s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 14px var(--neon);
+}
+
+/* === Firefox === */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon) #0a0a0a;
+}

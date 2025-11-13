@@ -2,8 +2,11 @@ import express from 'express';
 import exphbs from 'express-handlebars';
 import path from 'path';
 import session from 'express-session';
+import infoRouter from './routes/info.js'; //Ron added code here for Game Info page
 import routes from './routes/index.js';
 import {config} from 'dotenv';
+
+
 
 // Set up .env file for use
 config();
@@ -35,6 +38,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(path.resolve('public')));
+
+app.use('/', infoRouter); //Ron added code here for Game Info
 
 /* General Middleware */
 app.use((req, res, next) => {
@@ -73,7 +78,10 @@ app.use('/main', (req, res, next) => {
 })
 
 // Routes
+
 routes(app);
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
