@@ -104,6 +104,17 @@ async function getUserById(id) {
 }
 
 
+async function getAllUsers() {
+  const { data: players, error } = await sb
+    .from('players')
+    .select('*');
+
+    if (error) throw error;
+
+    return players
+}
+
+
 
 async function getUserRank(userId) {
   userId = helpers.checkId(userId);
@@ -140,11 +151,46 @@ async function getUserRank(userId) {
   return {rank, total: totalCount};
 }
 
+async function updateUserScore(userId, scoreChange) {
+  userId = helpers.checkId(userId);
+
+  // Fetch the user record from the DB
+  const { data: player, error: fetchError } = await sb
+    .from('players')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  console.log('updatedUserScore:',player)
+
+  // Calculate their new score and total ratings
+  const newScore = (player?.score || 0) + scoreChange;
+  const newTotalRatings = (player?.total_ratings || 0) + 1;
+
+  // Update the player in the DB
+  const { data: updatedPlayer, error: updateError } = await sb
+    .from('players')
+    .update({ 
+      score: newScore,
+      total_ratings: newTotalRatings
+    })
+    .eq('id', userId)
+    .select('*')
+    .single();
+
+  if (updateError) throw updateError;
+
+  return await updatedPlayer;
+}
+
 
 
 export default {
   registerUser,
   login,
   getUserById,
-  getUserRank
+  getAllUsers,
+  getUserRank,
+  updateUserScore
 }

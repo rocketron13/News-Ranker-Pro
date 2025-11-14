@@ -82,11 +82,12 @@
       const pct = Math.round((count*100)/total);
       return `
         <div class="results-row">
-          <span class="results-label">${label}</span>
           <div class="results-bar">
-            <div class="results-fill" style="width:${pct}%;">${pct}% (${count})</div>
+            <div class="results-fill" style="width:${pct}%;"></div>
           </div>
+          <span class="results-label">${pct}% (${count})</span>
         </div>
+
       `;
     }).join('');
     list.innerHTML = html;

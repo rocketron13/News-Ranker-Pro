@@ -12,6 +12,17 @@ router
       const topicTitle = helpers.checkString(req.query.topic, 'topics');
       const headline = await headlineData.getUnratedHeadline(req.session.user.id, topicTitle);
 
+      // User has rated all headlines in this category
+      if (!headline) {
+        return res.render('error', {
+          error: `Click the 'Main Menu' button below to return to the menu, and select a different category to continue playing!`,
+          topic: topicTitle,
+          score: req?.session?.user?.score,
+          rank: req?.session?.user?.rank,
+          total: req?.session?.user?.total
+        })
+      }
+
       return res.render('headline', {
         username: req.session.user.username,
         topic: topicTitle,
@@ -42,19 +53,28 @@ router
       const headlineId = helpers.checkId(req.body.headlineId);
       const stance = req.body.stance;
 
-      // Insert the rating
-      await headlineData.rateHeadline(req.session.user.id, headlineId, stance);
-
-      // Get summary of all ratings for this headline
-      const summary = await headlineData.getHeadlineRatingsSummary(headlineId);
-
       // Fetch same headline to display with summary
       const headline = await headlineData.getHeadlineById(headlineId);
-      const {message, score} = await headlineData.calculateScore(req.session.user.id, stance, summary);
 
-      // Update user ranking and score in the session
-      const player = await userData.getUserById(req.session.user.id);
+      // 1) Insert the rating
+      await headlineData.rateHeadline(req.session.user.id, headlineId, stance);
+
+      // 2) Get summary of all ratings for this headline
+      const summary = await headlineData.getHeadlineRatingsSummary(headlineId);
+
+      // 3) Calculate and update score in DB
+      const {message, score} = await headlineData.calculateScore(req.session.user.id, stance, summary);
+      console.log("Previous user score:", req.session.user.score)
+      console.log("score:", score)
+      console.log("message:", message)
+
+
+      // 4) Update user's score and fetch their updated DB record
+      const player = await userData.updateUserScore(req.session.user.id, score);
       const {rank, total} = await userData.getUserRank(req.session.user.id);
+      console.log("Updated player from DB:", player)
+      console.log("getUserRank() rank:", rank)
+      console.log("getUserRank() rank:", total)
       req.session.user.score = player.score;
       req.session.user.rank = rank;
       req.session.user.total = total;
