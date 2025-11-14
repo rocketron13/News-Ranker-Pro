@@ -1,5 +1,6 @@
 {{> topBanner}}
 
+{{#if status}}
 <section class="card" id="mainMenu">
     <h2>Uh oh! An Error Occurred</h2>
     <p id = "errorMessage">{{error}} - Error Code {{status}}</p>
@@ -13,3 +14,21 @@
     </form>
 
 </section>
+{{/if}}
+
+
+{{#unless status}}
+<section class="card" id="mainMenu">
+    <h2>You have rated all of the headlines for the '{{topic}}' category.</h2>
+    <p id = "errorMessage">{{error}}</p>
+
+    <form method="GET" action="/main">
+
+        <div class="mainMenuGroup">
+            <button type="submit">Main Menu</button>
+        </div>
+
+    </form>
+
+</section>
+{{/unless}}

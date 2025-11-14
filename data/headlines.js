@@ -46,7 +46,48 @@ async function getUnratedHeadline(playerId, topic) {
 }
 
 
-async function rateHeadline(playerId, headlineId, ratingValue) {
+async function getAllUnratedHeadlines(playerId, topic) {
+  // Valid input
+  playerId = helpers.checkId(playerId);
+  topic = helpers.checkString(topic, 'topic');
+
+  // Get the topicId from topic
+  const { data: topicData, error: topicError } = await sb
+    .from('topics')
+    .select('id')
+    .eq('title', topic)
+    .single();
+
+  if (topicError) throw topicError;
+  const topicId = topicData.id;
+
+  // Query Supabase for a headline that the user has not rated before
+  const { data: ratedHeadlines } = await sb
+    .from('ratings')
+    .select('headline_id')
+    .eq('user_id', playerId);
+
+  const ratedIds = ratedHeadlines?.map(r => r.headline_id) || [];
+
+  // Fetch ALL unrated headlines for this topic
+  const { data: headlines, error } = await sb
+    .from('headlines')
+    .select('*')
+    .eq('topic_id', topicId)
+    .not('id', 'in', `(${ratedIds.join(',')})`);
+
+  if (error) {
+    console.log("Error fetching headline:", error);
+    throw new Error("Error fetching headline:", error)
+  }
+
+  if (!headlines || headlines.length === 0) return null;
+
+  return headlines;
+}
+
+
+async function rateHeadline(playerId, headlineId, ratingValue) { 
   // Validate inputs
   playerId = helpers.checkId(playerId);
   headlineId = helpers.checkId(headlineId);
@@ -87,55 +128,7 @@ async function rateHeadline(playerId, headlineId, ratingValue) {
 
   if (ratingError) throw ratingError;
 
-  // 2) Update player's stats
-  // Fetch current totals
-  const { data: player, error: fetchError } = await sb
-    .from('players')
-    .select('total_ratings, score')
-    .eq('id', playerId)
-    .single();
-  if (fetchError) throw fetchError;
-
-  const { total_ratings = 0, score = 0 } = player;
-
-  // Update totals
-  const { data: playerData, error: playerError } = await sb
-    .from('players')
-    .update({
-      total_ratings: total_ratings + 1,
-      score: score + ratingValue
-    })
-    .eq('id', playerId)
-    .select()
-    .single();
-
-  if (playerError) throw playerError;
-
   return ratingData;
-}
-
-
-
-async function updateScore(userId, scoreChange) {
-  userId = helpers.checkId(userId);
-
-  const { data: player, error: fetchError } = await sb
-    .from('players')
-    .select('score')
-    .eq('id', userId)
-    .single();
-  if (fetchError) throw fetchError;
-
-  const newScore = (player?.score || 0) + scoreChange;
-
-  const { error: updateError } = await sb
-    .from('players')
-    .update({ score: newScore })
-    .eq('id', userId);
-
-  if (updateError) throw updateError;
-
-  return newScore;
 }
 
 
@@ -149,62 +142,94 @@ async function calculateScore(userId, userVote, summary) {
     '1': 'moderately_pro',
     '2': 'strongly_pro'
   };
+
   const userStance = stanceMap[userVote.toString()];
+  const totalVotesBefore = Object.values(summary).reduce((a, b) => a + b, 0);
 
-  const totalVotes = Object.values(summary).reduce((a, b) => a + b, 0) + 1;
-
-  // Early Trendsetter
-  if (totalVotes < 7) {
-    const score = 2;
-    await updateScore(userId, score);
-    return { message: "Early Trendsetter", score };
+  // ---- RULE 1: Early Trendsetter ----
+  if (totalVotesBefore < 7) {
+    return { score: 2, message: "Early Trendsetter" };
   }
 
+  // We need counts AFTER the user's vote (because flipping depends on new totals)
+  const updated = { ...summary };
+  updated[userStance] += 1;
+
+  const totalVotesAfter = Object.values(updated).reduce((a, b) => a + b, 0);
+
+  // Determine top stance BEFORE user vote
+  const maxBefore = Math.max(...Object.values(summary));
+  const topBefore = Object.keys(summary).filter(s => summary[s] === maxBefore);
+
+  // Determine top stance AFTER user vote (detect flips)
+  const maxAfter = Math.max(...Object.values(updated));
+  const topAfter = Object.keys(updated).filter(s => updated[s] === maxAfter);
+
+  // ---- RULE 2: Flipping Bonuses/Penalties ----
+  let flipScore = 0;
+  let message = null;
+
+  const userFlipped = topAfter.includes(userStance) && !topBefore.includes(userStance);
+
+  if (userFlipped) {
+    if (userStance === 'neutral') {
+      flipScore = -30;
+      message = "Numbing the Crowd to Overlook Nuance";
+    } else {
+      flipScore = 50;
+      message = "Ultra Impactful Vote Bonus!";
+    }
+  }
+
+  // ---- Determine directional crowd stance ----
   const proVotes = summary.strongly_pro + summary.moderately_pro;
   const antiVotes = summary.strongly_anti + summary.moderately_anti;
 
-  const maxCount = Math.max(...Object.values(summary));
-  const topStances = Object.keys(summary).filter(s => summary[s] === maxCount);
+  let crowdDirection = null;
+  if (proVotes > antiVotes) crowdDirection = 'pro';
+  else if (antiVotes > proVotes) crowdDirection = 'anti';
+  else crowdDirection = 'neutral'; // tie → no direction
 
-  // Check if user flipped the category
-  let message = "";
-  let flippedPoints = 0;
-  if (!topStances.includes('neutral') && summary[userStance] + 1 > maxCount) {
-    message = "Ultra Impactful Vote Bonus!";
-    flippedPoints = 50;
-  } else if (userStance === 'neutral' && summary[userStance] + 1 > maxCount) {
-    message = "Numbing the Crowd to Overlook Nuance";
-    flippedPoints = -30;
+  const userDirection =
+    userVote > 0 ? 'pro' :
+    userVote < 0 ? 'anti' :
+    'neutral';
+
+  // ---- RULE 3: Exact Match : 20 points ----
+  if (topBefore.includes(userStance)) {
+    return {
+      score: 20 + flipScore,
+      message: message || "Great Minds Think Alike"
+    };
   }
 
-  let score;
-  if (topStances.includes(userStance)) {
-    score = 20 + flippedPoints;
-    message ||= "Great Minds Think Alike";
-  } else if (userVote === 0) {
-    if (proVotes > antiVotes || antiVotes > proVotes) {
-      score = -10;
-      message = "Neutral Where There Is Nuance?";
+  // ---- RULE 4: Neutral scoring ----
+  if (userVote === 0) {
+    if (crowdDirection === 'neutral') {
+      return { score: 2 + flipScore, message: message || "Neutral Minds Match" };
     } else {
-      score = 2;
-      message = "Neutral Minds Match";
+      return { score: -10 + flipScore, message: message || "Neutral Where There Is Nuance?" };
     }
-  } else if (
-    (userVote > 0 && proVotes >= antiVotes) ||
-    (userVote < 0 && antiVotes > proVotes)
-  ) {
-    score = 10 + flippedPoints;
-    message ||= "Directionally in Line with the Crowd";
-  } else {
-    score = -10 + flippedPoints;
-    message ||= "Swimming with Salmon";
   }
 
-  // Update the user's score in DB
-  await updateScore(userId, score);
+  // ---- RULE 5: Directionally in Line : +10 ----
+  if (
+    (userDirection === 'pro' && crowdDirection === 'pro') ||
+    (userDirection === 'anti' && crowdDirection === 'anti')
+  ) {
+    return {
+      score: 10 + flipScore,
+      message: message || "Directionally in Line with the Crowd"
+    };
+  }
 
-  return { message, score };
+  // ---- RULE 6: Directionally Opposite : -10 ----
+  return {
+    score: -10 + flipScore,
+    message: message || "Swimming with Salmon"
+  };
 }
+
 
 
 
@@ -238,7 +263,16 @@ async function getHeadlineRatingsSummary(headlineId) {
 
   if (error) throw error;
 
-  // Initialize counter
+  // Rating map to map score to the title for simplief processing
+  const ratingMap = {
+    '-2': 'strongly_anti',
+    '-1': 'moderately_anti',
+    '0': 'neutral',
+    '1': 'moderately_pro',
+    '2': 'strongly_pro'
+  }
+
+  // Initialize counter map
   const summary = {
     "strongly_pro": 0,
     "moderately_pro": 0,
@@ -250,13 +284,8 @@ async function getHeadlineRatingsSummary(headlineId) {
   // Count each rating
   for (const row of data) {
     const rating = parseInt(row.stance, 10); // convert string to integer
-    switch (rating) {
-      case -2: summary.strongly_anti++; break;
-      case -1: summary.moderately_anti++; break;
-      case 0: summary.neutral++; break;
-      case 1: summary.moderately_pro++; break;
-      case 2: summary.strongly_pro++; break;
-    }
+    const key = ratingMap[rating];
+    if (key) summary[key]++;
   }
 
   return summary;
@@ -267,6 +296,7 @@ async function getHeadlineRatingsSummary(headlineId) {
 
 export default {
   getUnratedHeadline,
+  getAllUnratedHeadlines,
   rateHeadline,
   calculateScore,
   getHeadlineById,
