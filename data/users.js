@@ -14,12 +14,24 @@ async function registerUser(email, password, username, firstName, lastName) {
     throw new Error(`Username already taken.`);
   }
 
+  console.log("Trying to create user")
   // 2) Sign up via Supabase Auth (this enforces email uniqueness)
-  const user = await signUp(email, password);
+  let user;
+  try {
+    user = await signUp(email, password);
+  } catch (e) {
+    console.log("Error signing up user: " + e.message)
+  }
 
   // 3) Create a player table entry
-  const player = await createPlayerForUser(user.id, username, email, firstName, lastName);
+  let player;
+  try {
+    player = await createPlayerForUser(user.id, username, email, firstName, lastName);
+  } catch (e) {
+    console.log("Error creating player for user signup: " + e.message)
+  }
 
+  console.log("Successful user signup!")
   return {user, player};
 }
 
